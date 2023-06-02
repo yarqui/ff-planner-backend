@@ -14,7 +14,7 @@ connection
   .then(() => {
     app.listen(PORT, () => {
       console.log(
-        `Database connection successful. \nServer running. Use our API on port: ${PORT}.`
+        `Database connection successful. \nServer running. Use our API on port: ${PORT}. \nhttp://localhost:${PORT}/api/tasks `
       );
     });
   })
