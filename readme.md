@@ -1,29 +1,4 @@
-## Node.js contacts backend app
-
-Technologies:
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose.js
-- Docker
-- Supertest
-- Multer
-- Joi
-- Sendgrid
-- Nodemailer
-- Bcrypt
-- ENV
-- JWT
-- Gravatar
-
-Routes:
-- /
-- /:contactId
-- /:contactId/favorite
-- /login
-- /logout
-- /curent
-- /avatars
+## Node.js ff-planner-backend
 
 ### Commands:
 
