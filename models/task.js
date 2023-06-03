@@ -1,8 +1,8 @@
 // Mongoose model - is a noun in a single form, so we name the file task.js
 const { Schema, model } = require("mongoose");
-const Joi = require("joi");
+// const Joi = require("joi");
 const { handleMongooseError } = require("../helpers");
-const { userSchema } = require("./user");
+// const { userSchema } = require("./user");
 
 const priorityValues = ["low", "medium", "high"];
 const categoryValues = ["to-do", "in-progress", "done"];

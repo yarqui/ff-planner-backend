@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
-const Joi = require("joi");
+// const Joi = require("joi");
 const { handleMongooseError } = require("../helpers");
-const { userSchema } = require("./user");
+// const { userSchema } = require("./user");
 
 const reviewSchema = new Schema(
   {
@@ -33,7 +33,7 @@ const reviewSchema = new Schema(
 reviewSchema.post("save", handleMongooseError);
 
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
-const Review = model("review", taskSchema);
+const Review = model("review", reviewSchema);
 
 module.exports = {
   Review,
