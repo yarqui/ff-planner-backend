@@ -92,6 +92,13 @@ const login = async (req, res) => {
   });
 };
 
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: null });
+
+  res.status(204).json();
+};
+
 const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
   console.log("✅verificationToken:", verificationToken);
@@ -138,19 +145,19 @@ const resendVerifyEmail = async (req, res) => {
 };
 
 // we already have a req.user after authentication middleware, so we just take it and send it in response
-// const getCurrentUser = async (req, res) => {
-//   console.log("req:", req);
-//   console.log("req.user:", req.user);
-//   const { email } = req.user;
-//   res.status(200).json({ email });
-// };
+const getCurrentUser = async (req, res) => {
+  const { _id: id, theme, name, email, birthday, skype, avatarURL } = req.user;
+
+  res.status(200).json({
+    user: { id, theme, name, email, birthday, skype, avatarURL },
+  });
+};
 
 module.exports = {
   signup: ctrlWrapper(signup),
+  login: ctrlWrapper(login),
+  logout: ctrlWrapper(logout),
   verifyEmail: ctrlWrapper(verifyEmail),
   resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
-  login: ctrlWrapper(login),
-  //   getCurrentUser: ctrlWrapper(getCurrentUser),
-  //   logout: ctrlWrapper(logout),
-  //   updateUserAvatar: ctrlWrapper(updateUserAvatar),
+  getCurrentUser: ctrlWrapper(getCurrentUser),
 };
