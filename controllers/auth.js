@@ -101,7 +101,6 @@ const logout = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
-  console.log("✅verificationToken:", verificationToken);
   const user = await User.findOne({ verificationToken });
 
   if (!user) {
