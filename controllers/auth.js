@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const gravatar = require("gravatar");
 const { nanoid } = require("nanoid");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
@@ -11,7 +10,9 @@ const signup = async (req, res) => {
   // First, we check if email is already in use. If it is, we throw custom error message about email in use.
   const { name, email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = await User.findOne({ email: normalizedEmail });
   if (user) {
     throw HttpError(409, "Email is already in use");
   }
@@ -19,14 +20,13 @@ const signup = async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // returns a string -> link to generated avatar. 1st argument is email we associate avatar with, 2nd is options object to customize the Gravatar URL
-  const avatarURL = gravatar.url(email);
   // create verificationCode for verifying an email after sign up
   const verificationToken = await nanoid();
   // If email is unique, we make a request to create a new user;
   const newUser = await User.create({
     ...req.body,
+    email: normalizedEmail,
     password: hashedPassword,
-    avatarURL,
     verificationToken,
   });
 
@@ -35,9 +35,9 @@ const signup = async (req, res) => {
   }
 
   const verificationEmail = {
-    to: email,
+    to: normalizedEmail,
     subject: "Please verify your email",
-    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">here</a> to verify your email: <strong>${email}</strong></p>`,
+    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">here</a> to verify your email: <strong>${normalizedEmail}</strong></p>`,
   };
 
   // sends verification email
@@ -46,7 +46,7 @@ const signup = async (req, res) => {
   res.status(201).json({
     user: {
       name,
-      email,
+      email: normalizedEmail,
     },
   });
 };
@@ -55,7 +55,6 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  console.log("user:", user);
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
   }
@@ -86,15 +85,24 @@ const login = async (req, res) => {
     console.log(error.message);
   }
 
+  const { _id: id, theme, name, phone, birthday, skype, avatarURL } = user;
+
   res.status(200).json({
     token,
-    user: { email: user.email },
+    user: { id, theme, name, email, phone, birthday, skype, avatarURL },
+    // user: { email: user.email },
   });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: null });
+
+  res.status(204).json();
 };
 
 const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
-  console.log("✅verificationToken:", verificationToken);
   const user = await User.findOne({ verificationToken });
 
   if (!user) {
@@ -138,19 +146,78 @@ const resendVerifyEmail = async (req, res) => {
 };
 
 // we already have a req.user after authentication middleware, so we just take it and send it in response
-// const getCurrentUser = async (req, res) => {
-//   console.log("req:", req);
-//   console.log("req.user:", req.user);
-//   const { email } = req.user;
-//   res.status(200).json({ email });
-// };
+const getCurrentUser = async (req, res) => {
+  const { _id: id, theme, name, email, birthday, skype, avatarURL } = req.user;
+
+  res.status(200).json({
+    user: { id, theme, name, email, birthday, skype, avatarURL },
+  });
+};
+
+const updateUserName = async (req, res) => {
+  const { _id } = req.user;
+
+  if (!req.body) {
+    throw HttpError(400, "No data to update");
+  }
+
+  const { name } = req.body;
+
+  const updatedUser = await User.findByIdAndUpdate(
+    _id,
+    { name },
+    {
+      new: true,
+      select: "id theme name email birthday skype avatarURL",
+    }
+  );
+
+  if (!updatedUser) {
+    throw HttpError(404, "User not found");
+  }
+
+  res.status(200).json(updatedUser);
+};
+
+const updateUserEmail = async (req, res) => {
+  const { _id } = req.user;
+
+  if (!req.body) {
+    throw HttpError(400, "No data to update");
+  }
+
+  const { email } = req.body;
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = await User.findOne({ email: normalizedEmail });
+  if (user) {
+    throw HttpError(409, "Email is already in use");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    _id,
+    { email: normalizedEmail },
+    {
+      new: true,
+      select: "id theme name email birthday skype avatarURL",
+    }
+  );
+
+  if (!updatedUser) {
+    throw HttpError(404, "User not found");
+  }
+
+  res.status(200).json(updatedUser);
+};
 
 module.exports = {
   signup: ctrlWrapper(signup),
+  login: ctrlWrapper(login),
+  logout: ctrlWrapper(logout),
   verifyEmail: ctrlWrapper(verifyEmail),
   resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
-  login: ctrlWrapper(login),
-  //   getCurrentUser: ctrlWrapper(getCurrentUser),
-  //   logout: ctrlWrapper(logout),
-  //   updateUserAvatar: ctrlWrapper(updateUserAvatar),
+  getCurrentUser: ctrlWrapper(getCurrentUser),
+  updateUserName: ctrlWrapper(updateUserName),
+  updateUserEmail: ctrlWrapper(updateUserEmail),
 };

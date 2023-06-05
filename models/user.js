@@ -26,6 +26,7 @@ const userSchema = new Schema(
     phone: {
       type: String,
       maxLength: 20,
+      default: null,
     },
     password: {
       type: String,
@@ -86,7 +87,35 @@ const emailSchema = Joi.object({
   }),
 });
 
-const updateThemeSchema = Joi.object({
+const nameSchema = Joi.object({
+  name: Joi.string().required().messages({
+    "string.empty": `"name" cannot be an empty field`,
+    "any.required": `missing required field: "name"`,
+  }),
+});
+
+const phoneSchema = Joi.object({
+  phone: Joi.string().required().messages({
+    "string.empty": `"phone" cannot be an empty field`,
+    "any.required": `missing required field: "phone"`,
+  }),
+});
+
+const skypeSchema = Joi.object({
+  skype: Joi.string().required().messages({
+    "string.empty": `"skype" cannot be an empty field`,
+    "any.required": `missing required field: "skype"`,
+  }),
+});
+
+const birthdaySchema = Joi.object({
+  birthday: Joi.string().required().messages({
+    "string.empty": `"birthday" cannot be an empty field`,
+    "any.required": `missing required field: "birthday"`,
+  }),
+});
+
+const themeSchema = Joi.object({
   theme: Joi.string()
     .valid(...THEME_VALUES)
     .required(),
@@ -96,7 +125,11 @@ const schemas = {
   signupSchema,
   emailSchema,
   loginSchema,
-  updateThemeSchema,
+  nameSchema,
+  phoneSchema,
+  skypeSchema,
+  birthdaySchema,
+  themeSchema,
 };
 
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
