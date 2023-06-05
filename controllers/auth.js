@@ -11,7 +11,7 @@ const signup = async (req, res) => {
   // First, we check if email is already in use. If it is, we throw custom error message about email in use.
   const { name, email, password } = req.body;
 
-  const normalizedEmail = email.trim().toLocaleLowerCase();
+  const normalizedEmail = email.trim().toLowerCase();
 
   const user = await User.findOne({ email: normalizedEmail });
   if (user) {
