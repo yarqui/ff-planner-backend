@@ -11,7 +11,9 @@ const signup = async (req, res) => {
   // First, we check if email is already in use. If it is, we throw custom error message about email in use.
   const { name, email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.trim().toLocaleLowerCase();
+
+  const user = await User.findOne({ email: normalizedEmail });
   if (user) {
     throw HttpError(409, "Email is already in use");
   }
@@ -19,12 +21,13 @@ const signup = async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // returns a string -> link to generated avatar. 1st argument is email we associate avatar with, 2nd is options object to customize the Gravatar URL
-  const avatarURL = gravatar.url(email);
+  const avatarURL = gravatar.url(normalizedEmail);
   // create verificationCode for verifying an email after sign up
   const verificationToken = await nanoid();
   // If email is unique, we make a request to create a new user;
   const newUser = await User.create({
     ...req.body,
+    email: normalizedEmail,
     password: hashedPassword,
     avatarURL,
     verificationToken,
@@ -35,9 +38,9 @@ const signup = async (req, res) => {
   }
 
   const verificationEmail = {
-    to: email,
+    to: normalizedEmail,
     subject: "Please verify your email",
-    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">here</a> to verify your email: <strong>${email}</strong></p>`,
+    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">here</a> to verify your email: <strong>${normalizedEmail}</strong></p>`,
   };
 
   // sends verification email
@@ -46,7 +49,7 @@ const signup = async (req, res) => {
   res.status(201).json({
     user: {
       name,
-      email,
+      email: normalizedEmail,
     },
   });
 };
@@ -55,7 +58,6 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
-  console.log("user:", user);
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
   }
