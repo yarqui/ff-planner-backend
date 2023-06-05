@@ -4,7 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const tasksRouter = require("./routes/api/tasks");
 const authRouter = require("./routes/api/auth");
-
+const reviewsRouter = require("./routes/api/reviews")
 const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
@@ -16,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/tasks", tasksRouter);
 app.use("/api/users", authRouter);
+app.use("/api/reviews", reviewsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });

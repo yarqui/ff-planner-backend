@@ -1,26 +1,28 @@
 const { Schema, model } = require("mongoose");
-// const Joi = require("joi");
+const joi = require("joi");
 const { handleMongooseError } = require("../helpers");
 // const { userSchema } = require("./user");
 
 const reviewSchema = new Schema(
   {
-    comments: {
+    comment: {
       type: String,
-      masLength: 800,
+      maxLength: 800,
       required: [true, "Comment is required"],
     },
-    owner: {
-      // TODO: we will try to set the userSchema from user.js to match the exact object
-      // will it work?
-      // type: userSchema,
-      type: Object,
-      required: [true, "Comment's owner is required"],
-      rating: {
+    rating: {
         type: Number,
         required: [true, "Rating is required"],
-      },
     },
+    owner: {
+      type: Object,
+      required: [true, "Comment's owner is required"],
+    },
+    authReview: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
+      },
   },
   {
     // removes "_v" and adds creation and changing timestamps to document
@@ -35,6 +37,14 @@ reviewSchema.post("save", handleMongooseError);
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
 const Review = model("review", reviewSchema);
 
+const addSchema = joi.object({
+ 
+  comment: joi.string().min(3).max(800).required(),
+  owner: joi.object().required(),
+  rating: joi.number().min(1).max(5).required(),
+  })
+
 module.exports = {
   Review,
+  addSchema,
 };
