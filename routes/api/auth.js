@@ -21,4 +21,17 @@ router.post(
 
 router.get("/current", authenticate, ctrl.getCurrentUser);
 
+// router.patch(
+//   "/current/update-name",
+//   authenticate,
+//   validateBody(schemas.nameSchema),
+//   ctrl.updateUserName
+// );
+// router.patch(
+//   "/current/update-email",
+//   authenticate,
+//   validateBody(schemas.emailSchema),
+//   ctrl.updateUserEmail
+// );
+
 module.exports = router;
