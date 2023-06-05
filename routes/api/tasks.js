@@ -1,26 +1,17 @@
 const express = require("express");
 const { Task } = require("../../models/task");
 const { HttpError } = require("../../helpers");
+const { authenticate } = require("../../middlewares");
 const ctrl = require("../../controllers/tasks");
 
 const router = express.Router();
 
-router.get("/", ctrl.getAllByMonth);
+router.get("/", authenticate, ctrl.getAllTasksByMonth);
 
-router.post("/", ctrl.add);
+router.post("/", authenticate, ctrl.addTask);
 
-router.delete("/:id", ctrl.deleteById);
+router.delete("/:id", authenticate, ctrl.deleteTaskById);
 
-router.patch("/:id", ctrl.updateById);
-// FIXME: just for test. Later we will create controller
-// router.get("/", async (req, res) => {
-//   const result = await Task.find();
-
-//   if (!result) {
-//     throw HttpError(404, "Not found");
-//   }
-
-//   res.status(200).json(result);
-// });
+router.patch("/:id", authenticate, ctrl.updateTaskById);
 
 module.exports = router;
