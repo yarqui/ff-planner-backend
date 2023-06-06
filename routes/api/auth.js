@@ -19,19 +19,21 @@ router.post(
   ctrl.resendVerifyEmail
 );
 
+// TODO: delete it when we implement auto login after email verification
 router.get("/current", authenticate, ctrl.getCurrentUser);
 
-// router.patch(
-//   "/current/update-name",
-//   authenticate,
-//   validateBody(schemas.nameSchema),
-//   ctrl.updateUserName
-// );
-// router.patch(
-//   "/current/update-email",
-//   authenticate,
-//   validateBody(schemas.emailSchema),
-//   ctrl.updateUserEmail
-// );
+router.patch(
+  "/:userId",
+  authenticate,
+  validateBody(schemas.updateUserSchema),
+  ctrl.updateUserProfile
+);
+
+router.patch(
+  "/:userId/password",
+  authenticate,
+  validateBody(schemas.userPasswordSchema),
+  ctrl.changeUserPassword
+);
 
 module.exports = router;

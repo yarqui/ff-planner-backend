@@ -87,49 +87,26 @@ const emailSchema = Joi.object({
   }),
 });
 
-const nameSchema = Joi.object({
-  name: Joi.string().required().messages({
-    "string.empty": `"name" cannot be an empty field`,
-    "any.required": `missing required field: "name"`,
-  }),
+const updateUserSchema = Joi.object({
+  name: Joi.string().max(40),
+  email: Joi.string().pattern(EMAIL_REGEX),
+  phone: Joi.string().max(20),
+  skype: Joi.string(),
+  birthday: Joi.number(),
+  theme: Joi.string().valid(...THEME_VALUES),
 });
 
-const phoneSchema = Joi.object({
-  phone: Joi.string().required().messages({
-    "string.empty": `"phone" cannot be an empty field`,
-    "any.required": `missing required field: "phone"`,
-  }),
-});
-
-const skypeSchema = Joi.object({
-  skype: Joi.string().required().messages({
-    "string.empty": `"skype" cannot be an empty field`,
-    "any.required": `missing required field: "skype"`,
-  }),
-});
-
-const birthdaySchema = Joi.object({
-  birthday: Joi.string().required().messages({
-    "string.empty": `"birthday" cannot be an empty field`,
-    "any.required": `missing required field: "birthday"`,
-  }),
-});
-
-const themeSchema = Joi.object({
-  theme: Joi.string()
-    .valid(...THEME_VALUES)
-    .required(),
+const userPasswordSchema = Joi.object({
+  oldPassword: Joi.string().min(6).required(),
+  newPassword: Joi.string().min(6).required(),
 });
 
 const schemas = {
   signupSchema,
   emailSchema,
   loginSchema,
-  nameSchema,
-  phoneSchema,
-  skypeSchema,
-  birthdaySchema,
-  themeSchema,
+  updateUserSchema,
+  userPasswordSchema,
 };
 
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
