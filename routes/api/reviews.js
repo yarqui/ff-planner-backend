@@ -9,7 +9,7 @@ router.get("/", ctrl.getAll);
 
 // ----------------- get User Review --------------------------
 
-router.get("/auth", authenticate, ctrl.getAuthReview);
+router.get("/:userId", authenticate, ctrl.getAuthReview);
 
 //  ---------------- post review ----------------------------
 

@@ -45,13 +45,13 @@ const addReview = async (req, res, next) => {
       throw HttpError(400, error.message)
     }
     
-    const { _id, name, avatarURL, email } = req.user;
     const owner = {
-       name,
-       avatarURL,
-       email,
-       _id
+       name: req.user.name,
+       avatarURL:req.user.avatarURL,
+       email: req.user.email,
+       _id: req.user.id
     }
+    
     const {_id: authReview} = req.user;
     const result = await Review.create({...req.body, owner, authReview});
 
@@ -71,9 +71,16 @@ const updateReview = async (req, res, next) => {
       throw HttpError(400, error.message)
     }
 
+    const owner = {
+       name: req.user.name,
+       avatarURL:req.user.avatarURL,
+       email: req.user.email,
+       _id: req.user.id
+    }
+
     const { reviewId: _id } = req.params;
     const {_id: authReview} = req.user;
-    const result = await Review.findOneAndUpdate({_id, authReview}, req.body, {new: true});
+    const result = await Review.findOneAndUpdate({_id, authReview}, {...req.body, owner}, {new: true});
     if(!result) {
       throw HttpError(404, "Not found");
     }
