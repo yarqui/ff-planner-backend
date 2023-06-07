@@ -1,6 +1,7 @@
 const express = require('express');
-const {isValidId, authenticate} = require("../../middlewares")
-const ctrl = require("../../controllers/reviews")
+const {isValidId, authenticate, validateBody} = require("../../middlewares")
+const ctrl = require("../../controllers/reviews");
+const { addSchema } = require('../../models/review');
 const router = express.Router();
 
 
@@ -13,11 +14,11 @@ router.get("/:userId", authenticate, ctrl.getAuthReview);
 
 //  ---------------- post review ----------------------------
 
-router.post('/', authenticate, ctrl.addReview)
+router.post('/', authenticate, validateBody(addSchema), ctrl.addReview)
 
 // //  ------------------ update -------------------------------------------
 
-router.put('/:reviewId', authenticate, isValidId, ctrl.updateReview);
+router.patch('/:reviewId', authenticate, isValidId, validateBody(addSchema), ctrl.updateReview);
 
 // //  ----------------- delete ----------------------------------------------
 
