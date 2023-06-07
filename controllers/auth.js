@@ -1,11 +1,24 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
+const cloudinary = require("cloudinary").v2;
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
 
-const { SECRET_KEY, BASE_URL } = process.env;
+const {
+  SECRET_KEY,
+  BASE_URL,
+  CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+} = process.env;
 
+cloudinary.config({
+  cloud_name: CLOUDINARY_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
+  secure: true, // insures, that https is used while creating URLs
+});
 const signup = async (req, res) => {
   // First, we check if req.body is not empty, then we check if email is already in use. If it is, we throw custom error message about email in use.
   if (req.body === {}) {
