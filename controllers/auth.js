@@ -193,7 +193,20 @@ const resendVerifyEmail = async (req, res) => {
 
 // TODO: remove getCurrentUser with "/current" route when we set automatic login after email verification
 const getCurrentUser = async (req, res) => {
-  const { _id: id, theme, name, email, birthday, skype, avatarURL } = req.user;
+  const {
+    _id: idFromToken,
+    theme,
+    name,
+    email,
+    birthday,
+    skype,
+    avatarURL,
+  } = req.user;
+  const { userId: id } = req.params;
+
+  if (idFromToken.toString() !== id) {
+    throw HttpError(401, "You are not authorized to perform this action");
+  }
 
   res.status(200).json({
     user: { id, theme, name, email, birthday, skype, avatarURL },
