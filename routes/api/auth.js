@@ -1,5 +1,5 @@
 const express = require("express");
-const { validateBody, authenticate } = require("../../middlewares");
+const { validateBody, authenticate, isValidId } = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 const ctrl = require("../../controllers/auth");
@@ -19,8 +19,7 @@ router.post(
   ctrl.resendVerifyEmail
 );
 
-// TODO: delete it when we implement auto login after email verification
-router.get("/current", authenticate, ctrl.getCurrentUser);
+router.get("/:userId", authenticate, isValidId("userId"), ctrl.getCurrentUser);
 
 router.patch(
   "/:userId",
