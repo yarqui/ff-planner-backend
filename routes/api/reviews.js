@@ -1,9 +1,10 @@
+
 const express = require('express');
 const {isValidId, authenticate, validateBody} = require("../../middlewares")
 const ctrl = require("../../controllers/reviews");
 const { addSchema } = require('../../models/review');
-const router = express.Router();
 
+const router = express.Router();
 
 // ---------------- get all ---------------------------------
 router.get("/", ctrl.getAll);
@@ -22,7 +23,6 @@ router.patch('/:reviewId', authenticate, isValidId, validateBody(addSchema), ctr
 
 // //  ----------------- delete ----------------------------------------------
 
-router.delete('/:reviewId', authenticate, isValidId, ctrl.deleteReview)
-
+router.delete("/:reviewId", authenticate, isValidId, ctrl.deleteReview);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const express = require("express");
-const { validateBody, authenticate } = require("../../middlewares");
+const { validateBody, authenticate, isValidId } = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 const ctrl = require("../../controllers/auth");
@@ -19,19 +19,20 @@ router.post(
   ctrl.resendVerifyEmail
 );
 
-router.get("/current", authenticate, ctrl.getCurrentUser);
+router.get("/:userId", authenticate, isValidId("userId"), ctrl.getCurrentUser);
 
-// router.patch(
-//   "/current/update-name",
-//   authenticate,
-//   validateBody(schemas.nameSchema),
-//   ctrl.updateUserName
-// );
-// router.patch(
-//   "/current/update-email",
-//   authenticate,
-//   validateBody(schemas.emailSchema),
-//   ctrl.updateUserEmail
-// );
+router.patch(
+  "/:userId",
+  authenticate,
+  validateBody(schemas.updateUserSchema),
+  ctrl.updateUserProfile
+);
+
+router.patch(
+  "/:userId/password",
+  authenticate,
+  validateBody(schemas.userPasswordSchema),
+  ctrl.changeUserPassword
+);
 
 module.exports = router;
