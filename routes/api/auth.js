@@ -1,5 +1,10 @@
 const express = require("express");
-const { validateBody, authenticate, isValidId } = require("../../middlewares");
+const {
+  validateBody,
+  authenticate,
+  isValidId,
+  upload,
+} = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 const ctrl = require("../../controllers/auth");
@@ -22,17 +27,26 @@ router.post(
 router.get("/:userId", authenticate, isValidId("userId"), ctrl.getCurrentUser);
 
 router.patch(
-  "/:userId",
+  "/:userId/password",
   authenticate,
-  validateBody(schemas.updateUserSchema),
-  ctrl.updateUserProfile
+  isValidId("userId"),
+  validateBody(schemas.userPasswordSchema),
+  ctrl.changeUserPassword
 );
 
 router.patch(
-  "/:userId/password",
+  "/avatar",
   authenticate,
-  validateBody(schemas.userPasswordSchema),
-  ctrl.changeUserPassword
+  upload.single("avatar"), // "avatar" is the key of request method
+  ctrl.updateUserAvatar
+);
+
+router.patch(
+  "/:userId",
+  authenticate,
+  isValidId("userId"),
+  validateBody(schemas.updateUserSchema),
+  ctrl.updateUserProfile
 );
 
 module.exports = router;
