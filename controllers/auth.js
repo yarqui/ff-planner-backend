@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const fs = require("fs/promises");
 const { nanoid } = require("nanoid");
-const { cloudinary } = require("../cloudinary/cloudinary");
+const cloudinary = require("../cloudinary/cloudinary");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
 
@@ -246,41 +247,41 @@ const changeUserPassword = async (req, res) => {
 };
 
 const updateUserAvatar = async (req, res) => {
-  // const { _id } = req.user;
-  console.log("req.file:", req.file);
+  const { _id } = req.user;
+
   if (!req.file) {
     throw HttpError(400, "Missing the file to upload");
   }
   // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
-  // ❗❗❗"originalname" is the name of the uploaded file WITH extension
-  // In req.file we have the uploaded file. It doesn't go to req.body
-  const { path: tempPath, originalname } = req.file;
-  const avatarName = `${_id}-${originalname}`;
+  const { path } = req.file;
 
-  // TODO: we should add cloudinary logic here
+  const { secure_url: avatarURL } = await cloudinary.uploader.upload(path, {
+    transformation: [{ height: 600 }],
+  });
 
-  // destination path + name
+  // Deletes the file using the fs.unlink function
+  fs.unlink(path, (err) => {
+    if (err) {
+      console.error("Error deleting file:", err);
+    }
+    // Calls the callback function to proceed with the operation
+    cb(null);
+  });
 
-  // const avatarURL = path.join("avatars", avatarName);
-  // await fs.rename(tempPath, destinationUpload);
+  const result = await User.findByIdAndUpdate(
+    _id,
+    { avatarURL },
+    {
+      new: true,
+      select: "email avatarURL", // TODO: do we need it?
+    }
+  );
 
-  // const result = await User.findByIdAndUpdate(
-  //   _id,
-  //   { avatarURL },
-  //   {
-  //     new: true,
-  //     select: "email avatarURL",
-  //   }
-  // );
+  if (!result) {
+    throw HttpError(404);
+  }
 
-  // console.log("result:", result);
-
-  // if (!result) {
-  //   throw HttpError(404);
-  // }
-
-  // res.status(200).json(avatarURL);
-  res.status(200).json(req.file);
+  res.status(200).json({ avatarURL });
 };
 
 module.exports = {

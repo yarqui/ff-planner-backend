@@ -20,11 +20,10 @@ const fileFilter = (_, file, cb) => {
 // Returns a StorageEngine implementation configured to store files on the local file system
 const multerConfig = multer.diskStorage({
   destination: tempDir,
-
-  // filename option currently has no effect and simply saves the file using its original name, which is the default behavior
+  // filename option defines the name of the file
   filename: (_, file, cb) => {
     // 1st argument in cb is error handling
-    cb(null, file.originalname);
+    cb(null, new Date().toISOString + "-" + file.originalname);
   },
 });
 
