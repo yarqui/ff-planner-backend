@@ -1,5 +1,10 @@
 const express = require("express");
-const { validateBody, authenticate, isValidId } = require("../../middlewares");
+const {
+  validateBody,
+  authenticate,
+  isValidId,
+  upload,
+} = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 const ctrl = require("../../controllers/auth");
@@ -33,6 +38,13 @@ router.patch(
   authenticate,
   validateBody(schemas.userPasswordSchema),
   ctrl.changeUserPassword
+);
+
+router.patch(
+  "/avatar",
+  authenticate,
+  upload.single("avatar"), // "avatar" is the key of request method
+  ctrl.updateUserAvatar
 );
 
 module.exports = router;

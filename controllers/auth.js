@@ -18,7 +18,9 @@ cloudinary.config({
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
   secure: true, // insures, that https is used while creating URLs
+  // hide_sensitive: true, // Relevant for Node SDK only. Optional. Whether to ensure tokens, API keys and API secrets aren’t shown in error responses. Default: false.
 });
+
 const signup = async (req, res) => {
   // First, we check if req.body is not empty, then we check if email is already in use. If it is, we throw custom error message about email in use.
   if (req.body === {}) {
@@ -64,48 +66,6 @@ const signup = async (req, res) => {
       email: normalizedEmail,
     },
   });
-};
-
-const changeUserPassword = async (req, res) => {
-  const { _id } = req.user;
-  const { userId } = req.params;
-  console.log("req.params:", req.params);
-  console.log("req.body:", req.body);
-
-  // checks if _id from authentication is the same userId in params
-  if (_id.toString() !== userId) {
-    throw HttpError(401, "You are not authorized to perform this action");
-  }
-
-  if (req.body === {}) {
-    throw HttpError(400, "No data to update");
-  }
-  const { oldPassword, newPassword } = req.body;
-
-  const user = await User.findById(_id);
-  if (!user) {
-    throw HttpError(401);
-  }
-  // compares if password in DB is the same as password in request. If it is, it returns true.
-  const passwordCompare = await bcrypt.compare(oldPassword, user.password);
-  if (!passwordCompare) {
-    throw HttpError(401, "Old password is wrong");
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  const updatedUser = await User.findByIdAndUpdate(
-    _id,
-    {
-      password: hashedPassword,
-    },
-    {
-      new: true,
-      select: "id theme name email phone birthday skype avatarURL",
-    }
-  );
-
-  res.status(200).json({ user: updatedUser });
 };
 
 const login = async (req, res) => {
@@ -204,7 +164,6 @@ const resendVerifyEmail = async (req, res) => {
   res.status(200).json({ message: "Verification email sent" });
 };
 
-// TODO: remove getCurrentUser with "/current" route when we set automatic login after email verification
 const getCurrentUser = async (req, res) => {
   const {
     _id: idFromToken,
@@ -258,6 +217,86 @@ const updateUserProfile = async (req, res) => {
   res.status(200).json({ user: updatedUser });
 };
 
+const changeUserPassword = async (req, res) => {
+  const { _id } = req.user;
+  const { userId } = req.params;
+  console.log("req.params:", req.params);
+  console.log("req.body:", req.body);
+
+  // checks if _id from authentication is the same userId in params
+  if (_id.toString() !== userId) {
+    throw HttpError(401, "You are not authorized to perform this action");
+  }
+
+  if (req.body === {}) {
+    throw HttpError(400, "No data to update");
+  }
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(_id);
+  if (!user) {
+    throw HttpError(401);
+  }
+  // compares if password in DB is the same as password in request. If it is, it returns true.
+  const passwordCompare = await bcrypt.compare(oldPassword, user.password);
+  if (!passwordCompare) {
+    throw HttpError(401, "Old password is wrong");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  const updatedUser = await User.findByIdAndUpdate(
+    _id,
+    {
+      password: hashedPassword,
+    },
+    {
+      new: true,
+      select: "id theme name email phone birthday skype avatarURL",
+    }
+  );
+
+  res.status(200).json({ user: updatedUser });
+};
+
+const updateUserAvatar = async (req, res) => {
+  const { _id } = req.user;
+  console.log("_id:", _id);
+  // if (!req.file) {
+  //   throw HttpError(400, "Missing the file to upload");
+  // }
+  console.log("req.file:", req.file);
+  // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
+  // ❗❗❗"originalname" is the name of the uploaded file WITH extension
+  // In req.file we have the uploaded file. It doesn't go to req.body
+  // const { path: tempPath, originalname } = req.file;
+  // const avatarName = `${_id}-${originalname}`;
+
+  // TODO: we should add cloudinary logic here
+
+  // destination path + name
+  // const destinationUpload = path.join(avatarsDir, avatarName);
+  // const avatarURL = path.join("avatars", avatarName);
+  // await fs.rename(tempPath, destinationUpload);
+
+  // const result = await User.findByIdAndUpdate(
+  //   _id,
+  //   { avatarURL },
+  //   {
+  //     new: true,
+  //     select: "email avatarURL",
+  //   }
+  // );
+
+  // console.log("result:", result);
+
+  // if (!result) {
+  //   throw HttpError(404);
+  // }
+
+  // res.status(200).json(avatarURL);
+};
+
 module.exports = {
   signup: ctrlWrapper(signup),
   login: ctrlWrapper(login),
@@ -267,4 +306,5 @@ module.exports = {
   getCurrentUser: ctrlWrapper(getCurrentUser),
   updateUserProfile: ctrlWrapper(updateUserProfile),
   changeUserPassword: ctrlWrapper(changeUserPassword),
+  updateUserAvatar: ctrlWrapper(updateUserAvatar),
 };
