@@ -11,18 +11,18 @@ router.get("/", ctrl.getAll);
 
 // ----------------- get User Review --------------------------
 
-router.get("/:userId", authenticate, ctrl.getAuthReview);
+router.get("/my-reviews", authenticate, ctrl.getAuthReview);
 
 //  ---------------- post review ----------------------------
 
-router.post('/', authenticate, validateBody(addSchema), ctrl.addReview)
+router.post('/my-reviews', authenticate, validateBody(addSchema), ctrl.addReview)
 
 // //  ------------------ update -------------------------------------------
 
-router.patch('/:reviewId', authenticate, isValidId, validateBody(addSchema), ctrl.updateReview);
+router.patch('/my-reviews/:reviewId', authenticate, isValidId("reviewId"), validateBody(addSchema), ctrl.updateReview);
 
 // //  ----------------- delete ----------------------------------------------
 
-router.delete("/:reviewId", authenticate, isValidId, ctrl.deleteReview);
+router.delete('/my-reviews/:reviewId', authenticate, isValidId("reviewId"), ctrl.deleteReview)
 
 module.exports = router;

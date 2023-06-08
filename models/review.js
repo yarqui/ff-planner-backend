@@ -17,12 +17,7 @@ const reviewSchema = new Schema(
     owner: {
       type: Object,
       required: [true, "Comment's owner is required"],
-    },
-    // authReview: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "user",
-    //     required: true,
-    //   },
+    }
   },
   {
     // removes "_v" and adds creation and changing timestamps to document
