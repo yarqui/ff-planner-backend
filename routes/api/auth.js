@@ -27,15 +27,9 @@ router.post(
 router.get("/:userId", authenticate, isValidId("userId"), ctrl.getCurrentUser);
 
 router.patch(
-  "/:userId",
-  authenticate,
-  validateBody(schemas.updateUserSchema),
-  ctrl.updateUserProfile
-);
-
-router.patch(
   "/:userId/password",
   authenticate,
+  isValidId("userId"),
   validateBody(schemas.userPasswordSchema),
   ctrl.changeUserPassword
 );
@@ -45,6 +39,14 @@ router.patch(
   authenticate,
   upload.single("avatar"), // "avatar" is the key of request method
   ctrl.updateUserAvatar
+);
+
+router.patch(
+  "/:userId",
+  authenticate,
+  isValidId("userId"),
+  validateBody(schemas.updateUserSchema),
+  ctrl.updateUserProfile
 );
 
 module.exports = router;

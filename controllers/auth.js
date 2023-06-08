@@ -1,25 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
-const cloudinary = require("cloudinary").v2;
+const { cloudinary } = require("../cloudinary/cloudinary");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
 
-const {
-  SECRET_KEY,
-  BASE_URL,
-  CLOUDINARY_NAME,
-  CLOUDINARY_API_KEY,
-  CLOUDINARY_API_SECRET,
-} = process.env;
-
-cloudinary.config({
-  cloud_name: CLOUDINARY_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
-  secure: true, // insures, that https is used while creating URLs
-  // hide_sensitive: true, // Relevant for Node SDK only. Optional. Whether to ensure tokens, API keys and API secrets aren’t shown in error responses. Default: false.
-});
+const { SECRET_KEY, BASE_URL } = process.env;
 
 const signup = async (req, res) => {
   // First, we check if req.body is not empty, then we check if email is already in use. If it is, we throw custom error message about email in use.
@@ -260,22 +246,21 @@ const changeUserPassword = async (req, res) => {
 };
 
 const updateUserAvatar = async (req, res) => {
-  const { _id } = req.user;
-  console.log("_id:", _id);
-  // if (!req.file) {
-  //   throw HttpError(400, "Missing the file to upload");
-  // }
+  // const { _id } = req.user;
   console.log("req.file:", req.file);
+  if (!req.file) {
+    throw HttpError(400, "Missing the file to upload");
+  }
   // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
   // ❗❗❗"originalname" is the name of the uploaded file WITH extension
   // In req.file we have the uploaded file. It doesn't go to req.body
-  // const { path: tempPath, originalname } = req.file;
-  // const avatarName = `${_id}-${originalname}`;
+  const { path: tempPath, originalname } = req.file;
+  const avatarName = `${_id}-${originalname}`;
 
   // TODO: we should add cloudinary logic here
 
   // destination path + name
-  // const destinationUpload = path.join(avatarsDir, avatarName);
+
   // const avatarURL = path.join("avatars", avatarName);
   // await fs.rename(tempPath, destinationUpload);
 
@@ -295,6 +280,7 @@ const updateUserAvatar = async (req, res) => {
   // }
 
   // res.status(200).json(avatarURL);
+  res.status(200).json(req.file);
 };
 
 module.exports = {
