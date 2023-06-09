@@ -1,8 +1,7 @@
-const express = require('express');
-const {isValidId, authenticate} = require("../../middlewares")
-const ctrl = require("../../controllers/reviews")
+const express = require("express");
+const { isValidId, authenticate } = require("../../middlewares");
+const ctrl = require("../../controllers/reviews");
 const router = express.Router();
-
 
 // ---------------- get all ---------------------------------
 router.get("/", ctrl.getAll);
@@ -13,15 +12,14 @@ router.get("/auth", authenticate, ctrl.getAuthReview);
 
 //  ---------------- post review ----------------------------
 
-router.post('/', authenticate, ctrl.addReview)
+router.post("/", authenticate, ctrl.addReview);
 
 // //  ------------------ update -------------------------------------------
 
-router.put('/:reviewId', authenticate, isValidId, ctrl.updateReview);
+router.put("/:reviewId", authenticate, isValidId, ctrl.updateReview);
 
 // //  ----------------- delete ----------------------------------------------
 
-router.delete('/:reviewId', authenticate, isValidId, ctrl.deleteReview)
-
+router.delete("/:reviewId", authenticate, isValidId, ctrl.deleteReview);
 
 module.exports = router;

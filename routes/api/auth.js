@@ -1,5 +1,10 @@
 const express = require("express");
-const { validateBody, authenticate } = require("../../middlewares");
+const {
+  validateBody,
+  authenticate,
+  isValidId,
+  upload,
+} = require("../../middlewares");
 
 const { schemas } = require("../../models/user");
 const ctrl = require("../../controllers/auth");
@@ -19,21 +24,29 @@ router.post(
   ctrl.resendVerifyEmail
 );
 
-// TODO: delete it when we implement auto login after email verification
-router.get("/current", authenticate, ctrl.getCurrentUser);
-
-router.patch(
-  "/:userId",
-  authenticate,
-  validateBody(schemas.updateUserSchema),
-  ctrl.updateUserProfile
-);
+router.get("/:userId", authenticate, isValidId("userId"), ctrl.getCurrentUser);
 
 router.patch(
   "/:userId/password",
   authenticate,
+  isValidId("userId"),
   validateBody(schemas.userPasswordSchema),
   ctrl.changeUserPassword
+);
+
+router.patch(
+  "/avatar",
+  authenticate,
+  upload.single("avatar"), // "avatar" is the key of request method
+  ctrl.updateUserAvatar
+);
+
+router.patch(
+  "/:userId",
+  authenticate,
+  isValidId("userId"),
+  validateBody(schemas.updateUserSchema),
+  ctrl.updateUserProfile
 );
 
 module.exports = router;
