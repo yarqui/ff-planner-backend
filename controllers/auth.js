@@ -10,8 +10,8 @@ const { SECRET_KEY, BASE_URL } = process.env;
 
 const signup = async (req, res) => {
   // First, we check if req.body is not empty, then we check if email is already in use. If it is, we throw custom error message about email in use.
-  if (req.body === {}) {
-    throw HttpError(400, "No data to update");
+  if (JSON.stringify(req.body) === "{}") {
+    throw HttpError(400, "No data to update with");
   }
   const { name, email, password } = req.body;
 
@@ -56,8 +56,8 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  if (req.body === {}) {
-    throw HttpError(400, "No data to update");
+  if (JSON.stringify(req.body) === "{}") {
+    throw HttpError(400, "No data to update with");
   }
   const { email, password } = req.body;
 
@@ -181,8 +181,8 @@ const updateUserProfile = async (req, res) => {
     throw HttpError(401, "You are not authorized to perform this action");
   }
 
-  if (req.body === {}) {
-    throw HttpError(400, "No data to update");
+  if (JSON.stringify(req.body) === "{}") {
+    throw HttpError(400, "No data to update with");
   }
 
   const { email } = req.body;
@@ -207,16 +207,14 @@ const updateUserProfile = async (req, res) => {
 const changeUserPassword = async (req, res) => {
   const { _id } = req.user;
   const { userId } = req.params;
-  console.log("req.params:", req.params);
-  console.log("req.body:", req.body);
 
   // checks if _id from authentication is the same userId in params
   if (_id.toString() !== userId) {
     throw HttpError(401, "You are not authorized to perform this action");
   }
 
-  if (req.body === {}) {
-    throw HttpError(400, "No data to update");
+  if (JSON.stringify(req.body) === "{}") {
+    throw HttpError(400, "No data to update with");
   }
   const { oldPassword, newPassword } = req.body;
 
