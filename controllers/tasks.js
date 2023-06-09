@@ -10,8 +10,6 @@ const getAllTasksByMonth = async (req, res) => {
     userAvatar: avatarURL,
   };
 
-  console.log(req.body);
-
   const result = await Task.find({ assignedUser }, "-createdAt -updatedAt");
 
   res.status(200).json(result);
@@ -39,12 +37,14 @@ const addTask = async (req, res) => {
 
 const deleteTaskById = async (req, res) => {
   const reqUserId = req.user._id.toString();
-  console.log(reqUserId);
   const { taskId } = req.params;
 
   const receivedTask = await Task.findById(taskId);
   const receivedUserId = receivedTask.assignedUser.userId.toString();
-  console.log(receivedUserId);
+
+  if (!receivedTask) {
+    throw HttpError(404);
+  }
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
@@ -63,18 +63,20 @@ const deleteTaskById = async (req, res) => {
 
 const updateTaskById = async (req, res) => {
   if (Object.keys(req.body).length === 0) {
-    res.status(400).json({
-      message: "missing fields",
-    });
+    throw HttpError(400, "missing fields");
   }
 
   const reqUserId = req.user._id.toString();
   const { taskId } = req.params;
 
   const receivedTask = await Task.findById(taskId);
-  const receivedUserID = receivedTask.assignedUser.userId.toString();
+  const receivedUserId = receivedTask.assignedUser.userId.toString();
 
-  if (reqUserId !== receivedUserID) {
+  if (!receivedTask) {
+    throw HttpError(404);
+  }
+
+  if (reqUserId !== receivedUserId) {
     throw HttpError(401);
   }
 
