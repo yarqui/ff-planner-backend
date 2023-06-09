@@ -17,12 +17,7 @@ const reviewSchema = new Schema(
     owner: {
       type: Object,
       required: [true, "Comment's owner is required"],
-    },
-    authReview: {
-        type: Schema.Types.ObjectId,
-        ref: "user",
-        required: true,
-      },
+    }
   },
   {
     // removes "_v" and adds creation and changing timestamps to document
@@ -40,7 +35,7 @@ const Review = model("review", reviewSchema);
 const addSchema = joi.object({
  
   comment: joi.string().min(3).max(800).required(),
-  owner: joi.object().required(),
+  owner: joi.object(),
   rating: joi.number().min(1).max(5).required(),
   })
 
