@@ -10,8 +10,8 @@ router.get("/", authenticate, ctrl.getAllTasksByMonth);
 
 router.post("/", authenticate, ctrl.addTask);
 
-router.delete("/:id", authenticate, ctrl.deleteTaskById);
+router.delete("/:taskId", authenticate, ctrl.deleteTaskById);
 
-router.patch("/:id", authenticate, ctrl.updateTaskById);
+router.patch("/:taskId", authenticate, ctrl.updateTaskById);
 
 module.exports = router;
