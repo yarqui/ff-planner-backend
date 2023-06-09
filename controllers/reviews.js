@@ -8,21 +8,23 @@ const getAll = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const result = await Review.find({}, "-createdAt -updatedAt", { skip, limit });
-      
+     if(!result) {
+      throw HttpError(404);
+    }  
     res.status(200).json(result)
 }
 
 // ---------------------- Get User Review ---------------------
-const getAuthReview = async (req, res) => {    
+// const getAuthReview = async (req, res) => {    
 
-  const {page = 1, limit = 15 } = req.query;
-  const skip = (page - 1) * limit;
-  const { _id } = req.user;
+//   const {page = 1, limit = 15 } = req.query;
+//   const skip = (page - 1) * limit;
+//   const { _id } = req.user;
 
-  const result = await Review.find({"owner._id": _id}, "-createdAt -updatedAt" , { skip, limit });
+//   const result = await Review.find({"owner._id": _id}, "-createdAt -updatedAt" , { skip, limit });
 
-  res.status(200).json(result);
-}
+//   res.status(200).json(result);
+// }
 
 // ------------------ Add Review --------------------------
 const addReview = async (req, res) => {
@@ -34,8 +36,11 @@ const addReview = async (req, res) => {
   _id,
     };
     
-  const result = await Review.create({...req.body, owner});
-
+  const result = await Review.create({ ...req.body, owner });
+  if(!result) {
+      throw HttpError(404);
+  }
+  
   res.status(201).json(result);
   } 
 
@@ -90,7 +95,7 @@ const deleteReview = async (req, res) => {
 
 module.exports = {
     getAll: ctrlWrapper(getAll),
-    getAuthReview: ctrlWrapper(getAuthReview),
+    // getAuthReview: ctrlWrapper(getAuthReview),
     addReview: ctrlWrapper(addReview),
     updateReview: ctrlWrapper(updateReview),
     deleteReview: ctrlWrapper(deleteReview),
