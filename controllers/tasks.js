@@ -10,13 +10,10 @@ const getAllTasksByMonth = async (req, res) => {
     userAvatar: avatarURL,
   };
 
+  console.log(req.body);
+
   const result = await Task.find({ assignedUser }, "-createdAt -updatedAt");
-  // const date = new Date(result[0].startAt);
-  // const dateTimestamp = date.toISOString();
-  // const month = dateTimestamp.split("-");
-  // console.log(month);
-  // console.log(date.toISOString());
-  // console.log(result[0].startAt);
+
   res.status(200).json(result);
 };
 
