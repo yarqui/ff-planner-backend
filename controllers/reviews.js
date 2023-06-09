@@ -3,15 +3,48 @@ const { Review } = require('../models/review');
 
 // ----------------------- Get All --------------------------
 const getAll = async (req, res) => {
-  
-    const {page = 1, limit = 15} = req.query;
-    const skip = (page - 1) * limit;
+ 
+  const { page = 1, limit = 20, filterBy, ownerId } = req.query;
+  const skip = (page - 1) * limit;
 
     const result = await Review.find({}, "-createdAt -updatedAt", { skip, limit });
-     if(!result) {
+    if (!result) {
       throw HttpError(404);
-    }  
-    res.status(200).json(result)
+    }
+
+  if (filterBy === "best") {
+  const findResultByRating = result.filter(res => {
+      return res.rating >= 4
+    })
+  if (!findResultByRating) {
+      throw HttpError(404);
+    }
+
+     res.status(200).json(findResultByRating)
+  }
+
+  if (filterBy === "owner") {
+      const findResultByOwner = result.filter(res => {
+
+   return res.owner._id.toString() === ownerId.toString()
+  })
+  if (!findResultByOwner) {
+      throw HttpError(404);
+    }
+    
+    res.status(200).json(findResultByOwner)
+  }
+  
+//   switch (filterBy) {
+//   case "best":
+//     res.status(200).json(findResultByRating)
+//     break;
+//   case "owner":
+//     res.status(200).json(findResultByOwner)
+//     break;
+//   default:
+//     throw HttpError(404);
+// }
 }
 
 // ---------------------- Get User Review ---------------------
