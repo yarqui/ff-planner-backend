@@ -23,7 +23,7 @@ const multerConfig = multer.diskStorage({
   // filename option defines the name of the file
   filename: (_, file, cb) => {
     // 1st argument in cb is error handling
-    cb(null, new Date().toISOString + "-" + file.originalname);
+    cb(null, file.originalname);
   },
 });
 

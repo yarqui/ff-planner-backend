@@ -37,7 +37,7 @@ router.patch(
 router.patch(
   "/avatar",
   authenticate,
-  upload.single("avatar"), // "avatar" is the key of request method
+  upload.single("avatar"), // "avatar" is the key for file on request method
   ctrl.updateUserAvatar
 );
 
