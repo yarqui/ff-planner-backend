@@ -52,6 +52,10 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatarPublicId: {
+      type: String,
+      default: null,
+    },
     verified: {
       // this field is responsible for whether the user has verified his email
       type: Boolean,
@@ -101,6 +105,8 @@ const userPasswordSchema = Joi.object({
   oldPassword: Joi.string().min(6).required(),
   newPassword: Joi.string().min(6).required(),
 });
+
+// TODO: add avatar joi schema?
 
 const schemas = {
   signupSchema,

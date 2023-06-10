@@ -252,7 +252,8 @@ const changeUserPassword = async (req, res) => {
 };
 
 const updateUserAvatar = async (req, res) => {
-  const { _id } = req.user;
+  const { _id, avatarPublicId: avatarIdFromDB } = req.user;
+  console.log("avatarIdFromDB:", avatarIdFromDB);
 
   if (!req.file) {
     throw HttpError(400, "Missing the file to upload");
@@ -260,12 +261,16 @@ const updateUserAvatar = async (req, res) => {
   // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
   const { path } = req.file;
 
-  const { secure_url: avatarURL, public_id } = await cloudinary.uploader.upload(
-    path,
-    {
+  // If there is
+  if (avatarIdFromDB) {
+    const deletePrevAvatar = await cloudinary.uploader.destroy(avatarIdFromDB);
+    console.log("deletePrevAvatar:", deletePrevAvatar);
+  }
+
+  const { secure_url: avatarURL, public_id: avatarPublicId } =
+    await cloudinary.uploader.upload(path, {
       transformation: [{ height: 600 }],
-    }
-  );
+    });
 
   // Deletes the file using the fs.unlink function
   fs.unlink(path, (err) => {
@@ -278,7 +283,7 @@ const updateUserAvatar = async (req, res) => {
 
   const result = await User.findByIdAndUpdate(
     _id,
-    { avatarURL },
+    { avatarURL, avatarPublicId },
     {
       new: true,
       select: "email avatarURL", // TODO: do we need it?
@@ -289,7 +294,7 @@ const updateUserAvatar = async (req, res) => {
     throw HttpError(404);
   }
 
-  res.status(200).json({ avatarURL, public_id });
+  res.status(200).json({ avatarURL, avatarPublicId });
 };
 
 module.exports = {
