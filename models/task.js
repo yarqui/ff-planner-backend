@@ -1,28 +1,25 @@
 // Mongoose model - is a noun in a single form, so we name the file task.js
 const { Schema, model } = require("mongoose");
 const Joi = require("joi");
-Joi.objectId = require("joi-objectid")(Joi);
 
 const { handleMongooseError } = require("../helpers");
-// const { userSchema } = require("./user");
 
-const priorityValues = ["low", "medium", "high"];
-const categoryValues = ["to-do", "in-progress", "done"];
-const timestampRegex =
-  /(\b(\d{4})\-(\d{2})(\-(\d{2})))(T| )((\d{2}):(\d{2}))(?:(:(\d{2}))?(((\.)\d+))?([Zz]|((\-|\+)\d{2}(:(\d{2}))?))?)/g;
+const PRIORITY_VALUES = ["low", "medium", "high"];
+const CATEGORY_VALUES = ["to-do", "in-progress", "done"];
+const TIMESTAMP_REGEX = /^\d{10}$/;
 
 const taskSchema = new Schema(
   {
     // timestamp
     startAt: {
       type: Number,
-      match: timestampRegex,
+      match: TIMESTAMP_REGEX,
       required: [true, "Set a start time to a task"],
     },
     // timestamp
     endAt: {
       type: Number,
-      match: timestampRegex,
+      match: TIMESTAMP_REGEX,
       required: [true, "Set an end time to a task"],
     },
     title: {
@@ -50,17 +47,17 @@ const taskSchema = new Schema(
       },
       userAvatar: {
         type: String,
-        required: true,
+        default: null,
       },
     },
     priority: {
       type: String,
-      enum: priorityValues,
+      enum: PRIORITY_VALUES,
       required: [true, "Set a priority to a task"],
     },
     category: {
       type: String,
-      enum: categoryValues,
+      enum: CATEGORY_VALUES,
       required: [true, "Set a category to a task"],
     },
   },
@@ -79,16 +76,11 @@ const addTaskSchema = Joi.object({
   startAt: Joi.number().required(),
   endAt: Joi.number().required(),
   title: Joi.string().required(),
-  assignedUser: {
-    userId: Joi.objectId().required(),
-    userName: Joi.string().required(),
-    userAvatar: Joi.string().required(),
-  },
   priority: Joi.string()
-    .valid(...priorityValues)
+    .valid(...PRIORITY_VALUES)
     .required(),
   category: Joi.string()
-    .valid(...categoryValues)
+    .valid(...CATEGORY_VALUES)
     .required(),
 });
 
@@ -96,13 +88,8 @@ const updateTaskSchema = Joi.object({
   startAt: Joi.number(),
   endAt: Joi.number(),
   title: Joi.string(),
-  assignedUser: {
-    userId: Joi.objectId().required(),
-    userName: Joi.string().required(),
-    userAvatar: Joi.string().required(),
-  },
-  priority: Joi.string().valid(...priorityValues),
-  category: Joi.string().valid(...categoryValues),
+  priority: Joi.string().valid(...PRIORITY_VALUES),
+  category: Joi.string().valid(...CATEGORY_VALUES),
 });
 
 const taskSchemas = {

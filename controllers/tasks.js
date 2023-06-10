@@ -40,11 +40,12 @@ const deleteTaskById = async (req, res) => {
   const { taskId } = req.params;
 
   const receivedTask = await Task.findById(taskId);
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
 
   if (!receivedTask) {
     throw HttpError(404);
   }
+
+  const receivedUserId = receivedTask.assignedUser.userId.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
@@ -62,6 +63,8 @@ const deleteTaskById = async (req, res) => {
 };
 
 const updateTaskById = async (req, res) => {
+  //const { startAt, endAt } = req.body;
+
   if (Object.keys(req.body).length === 0) {
     throw HttpError(400, "missing fields");
   }
@@ -70,15 +73,29 @@ const updateTaskById = async (req, res) => {
   const { taskId } = req.params;
 
   const receivedTask = await Task.findById(taskId);
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
 
   if (!receivedTask) {
     throw HttpError(404);
   }
 
+  console.log(receivedTask);
+
+  const receivedUserId = receivedTask.assignedUser.userId.toString();
+
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
   }
+
+  if (req.body.startAt && req.body.startAt > receivedTask.endAt) {
+    throw HttpError(404, "End time should be later than start time");
+  }
+
+  if (req.body.endAt && req.body.endAt < receivedTask.startAt) {
+    throw HttpError(404, "End time should be later than start time");
+  }
+  // if (startAt > endAt) {
+  //   throw HttpError(404, "End time should be later than start time");
+  // }
 
   const result = await Task.findOneAndUpdate({ _id: taskId }, req.body, {
     new: true,
