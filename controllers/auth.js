@@ -277,12 +277,12 @@ const updateUserAvatar = async (req, res) => {
       console.error("Error deleting file:", err);
     }
     // Calls the callback function to proceed with the operation
-    cb(null); // eslint-disable-line
+    cb(null);
   });
 
   const result = await User.findByIdAndUpdate(
     _id,
-    { avatarURL, avatarPublicId },
+    { avatarURL },
     {
       new: true,
     }
