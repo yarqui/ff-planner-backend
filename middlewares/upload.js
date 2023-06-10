@@ -1,19 +1,17 @@
 const multer = require("multer");
 const path = require("path");
 
+const MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/bmp"];
+
 // Always create a path using path.join(). Don't hardcode it, because of a relative path problem
 const tempDir = path.join(__dirname, "../", "temp");
 
 const fileFilter = (_, file, cb) => {
-  if (
-    file.mimetype === "image/jpeg" ||
-    file.mimetype === "image/png" ||
-    file.mimetype === "image/bmp"
-  ) {
+  if (MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
     // reject file
-    cb({ message: "Unsupported file format " }, false);
+    cb({ message: "Unsupported file format " }, false); // eslint-disable-line
   }
 };
 
@@ -23,7 +21,7 @@ const multerConfig = multer.diskStorage({
   // filename option defines the name of the file
   filename: (_, file, cb) => {
     // 1st argument in cb is error handling
-    cb(null, new Date().toISOString + "-" + file.originalname);
+    cb(null, file.originalname);
   },
 });
 

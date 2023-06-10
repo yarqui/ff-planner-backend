@@ -2,9 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs/promises");
 const { nanoid } = require("nanoid");
-const cloudinary = require("../cloudinary/cloudinary");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
+const {
+  uploadAvatar,
+  deleteAvatar,
+} = require("../cloudinary/cloudinaryOperations");
 
 const { SECRET_KEY, BASE_URL } = process.env;
 
@@ -83,10 +86,13 @@ const login = async (req, res) => {
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
 
   // adds token field to user document
-  await User.findByIdAndUpdate(user._id, { token });
+  const result = await User.findByIdAndUpdate(user._id, { token });
+  if (!result) {
+    throw HttpError(400);
+  }
 
-  // checks token expiration, and whether this token was encrypted using this SECRET_KEY. Throws an error, if token is expired. that's why we should use try catch. If token is valid, it returns our payload - in our case "id" of the user.
   try {
+    // checks token expiration, and whether this token was encrypted using this SECRET_KEY. Throws an error, if token is expired. that's why we should use try catch. If token is valid, it returns our payload - in our case "id" of the user.
     const { id } = jwt.verify(token, SECRET_KEY); // eslint-disable-line
   } catch (error) {
     console.log(error.message);
@@ -241,11 +247,15 @@ const changeUserPassword = async (req, res) => {
     }
   );
 
+  if (!updatedUser) {
+    throw HttpError(401, "Email or password is wrong");
+  }
+
   res.status(200).json({ user: updatedUser });
 };
 
 const updateUserAvatar = async (req, res) => {
-  const { _id } = req.user;
+  const { _id, avatarPublicId: avatarIdFromDB = null } = req.user;
 
   if (!req.file) {
     throw HttpError(400, "Missing the file to upload");
@@ -253,25 +263,28 @@ const updateUserAvatar = async (req, res) => {
   // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
   const { path } = req.file;
 
-  const { secure_url: avatarURL } = await cloudinary.uploader.upload(path, {
-    transformation: [{ height: 600 }],
-  });
+  // If there is a previous avatar public_id in DB, it deletes it, before uploading a new one
+  if (avatarIdFromDB) {
+    await deleteAvatar(avatarIdFromDB);
+  }
 
-  // Deletes the file using the fs.unlink function
+  const { secure_url: avatarURL, public_id: avatarPublicId } =
+    await uploadAvatar(path);
+
+  // Deletes the file from device after uploading, using the fs.unlink function
   fs.unlink(path, (err) => {
     if (err) {
       console.error("Error deleting file:", err);
     }
     // Calls the callback function to proceed with the operation
-    cb(null);
+    cb(null); // eslint-disable-line
   });
 
   const result = await User.findByIdAndUpdate(
     _id,
-    { avatarURL },
+    { avatarURL, avatarPublicId },
     {
       new: true,
-      select: "email avatarURL", // TODO: do we need it?
     }
   );
 
@@ -279,7 +292,7 @@ const updateUserAvatar = async (req, res) => {
     throw HttpError(404);
   }
 
-  res.status(200).json({ avatarURL });
+  res.status(200).json({ avatarURL, avatarPublicId });
 };
 
 module.exports = {
