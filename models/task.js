@@ -1,22 +1,25 @@
 // Mongoose model - is a noun in a single form, so we name the file task.js
 const { Schema, model } = require("mongoose");
-// const Joi = require("joi");
-const { handleMongooseError } = require("../helpers");
-// const { userSchema } = require("./user");
+const Joi = require("joi");
 
-const priorityValues = ["low", "medium", "high"];
-const categoryValues = ["to-do", "in-progress", "done"];
+const { handleMongooseError } = require("../helpers");
+
+const PRIORITY_VALUES = ["low", "medium", "high"];
+const CATEGORY_VALUES = ["to-do", "in-progress", "done"];
+const TIMESTAMP_REGEX = /^\d{10}$/;
 
 const taskSchema = new Schema(
   {
     // timestamp
     startAt: {
       type: Number,
+      match: TIMESTAMP_REGEX,
       required: [true, "Set a start time to a task"],
     },
     // timestamp
     endAt: {
       type: Number,
+      match: TIMESTAMP_REGEX,
       required: [true, "Set an end time to a task"],
     },
     title: {
@@ -44,17 +47,17 @@ const taskSchema = new Schema(
       },
       userAvatar: {
         type: String,
-        required: true,
+        default: null,
       },
     },
     priority: {
       type: String,
-      enum: priorityValues,
+      enum: PRIORITY_VALUES,
       required: [true, "Set a priority to a task"],
     },
     category: {
       type: String,
-      enum: categoryValues,
+      enum: CATEGORY_VALUES,
       required: [true, "Set a category to a task"],
     },
   },
@@ -68,9 +71,35 @@ const taskSchema = new Schema(
 // if during saving we have an error, this middleware is set, otherwise mongoose error doesn't set error.status
 taskSchema.post("save", handleMongooseError);
 
+// Joi schema for adding a task
+const addTaskSchema = Joi.object({
+  startAt: Joi.number().required(),
+  endAt: Joi.number().required(),
+  title: Joi.string().required(),
+  priority: Joi.string()
+    .valid(...PRIORITY_VALUES)
+    .required(),
+  category: Joi.string()
+    .valid(...CATEGORY_VALUES)
+    .required(),
+});
+
+const updateTaskSchema = Joi.object({
+  startAt: Joi.number(),
+  endAt: Joi.number(),
+  title: Joi.string(),
+  priority: Joi.string().valid(...PRIORITY_VALUES),
+  category: Joi.string().valid(...CATEGORY_VALUES),
+});
+
+const taskSchemas = {
+  addTaskSchema,
+  updateTaskSchema,
+};
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
 const Task = model("task", taskSchema);
 
 module.exports = {
   Task,
+  taskSchemas,
 };
