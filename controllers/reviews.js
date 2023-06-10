@@ -1,63 +1,34 @@
 const { ctrlWrapper, HttpError } = require('../helpers');
+const mongoose = require("mongoose");
 const { Review } = require('../models/review');
 
 // ----------------------- Get All --------------------------
 const getAll = async (req, res) => {
+
+  const { page = 1, limit = 20, filterBy, ownerId } = req.query; 
+  const skip = (page - 1) * limit; 
  
-  const { page = 1, limit = 20, filterBy, ownerId } = req.query;
-  const skip = (page - 1) * limit;
+  const filter = {}; 
+ 
+  if (filterBy === "owner" && ownerId) { 
+    filter["owner._id"] = new mongoose.Types.ObjectId(ownerId); 
+  } 
+ 
+  if (filterBy === "best") { 
+    filter.rating = { $gte: 4 }; 
+  } 
+ 
+  const result = await Review.find(filter, "-createdAt -updatedAt", { 
+    skip, 
+    limit, 
+  }) 
 
-    const result = await Review.find({}, "-createdAt -updatedAt", { skip, limit });
-    if (!result) {
+   if(!result) {
       throw HttpError(404);
-    }
-
-  if (filterBy === "best") {
-  const findResultByRating = result.filter(res => {
-      return res.rating >= 4
-    })
-  if (!findResultByRating) {
-      throw HttpError(404);
-    }
-
-     res.status(200).json(findResultByRating)
-  } else if (filterBy === "owner") {
-      const findResultByOwner = result.filter(res => {
-
-   return res.owner._id.toString() === ownerId.toString()
-  })
-  if (!findResultByOwner) {
-      throw HttpError(404);
-    }
-    
-    res.status(200).json(findResultByOwner)
-  } else {
-    res.status(200).json(result)
   }
-  
-//   switch (filterBy) {
-//   case "best":
-//     res.status(200).json(findResultByRating)
-//     break;
-//   case "owner":
-//     res.status(200).json(findResultByOwner)
-//     break;
-//   default:
-//     throw HttpError(404);
-// }
+ 
+  res.status(200).json(result); 
 }
-
-// ---------------------- Get User Review ---------------------
-// const getAuthReview = async (req, res) => {    
-
-//   const {page = 1, limit = 15 } = req.query;
-//   const skip = (page - 1) * limit;
-//   const { _id } = req.user;
-
-//   const result = await Review.find({"owner._id": _id}, "-createdAt -updatedAt" , { skip, limit });
-
-//   res.status(200).json(result);
-// }
 
 // ------------------ Add Review --------------------------
 const addReview = async (req, res) => {
@@ -128,7 +99,6 @@ const deleteReview = async (req, res) => {
 
 module.exports = {
     getAll: ctrlWrapper(getAll),
-    // getAuthReview: ctrlWrapper(getAuthReview),
     addReview: ctrlWrapper(addReview),
     updateReview: ctrlWrapper(updateReview),
     deleteReview: ctrlWrapper(deleteReview),
