@@ -2,9 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs/promises");
 const { nanoid } = require("nanoid");
-const cloudinary = require("../cloudinary/cloudinary");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper, sendSgEmail } = require("../helpers");
+const {
+  uploadAvatar,
+  deleteAvatar,
+} = require("../cloudinary/cloudinaryOperations");
 
 const { SECRET_KEY, BASE_URL } = process.env;
 
@@ -252,8 +255,7 @@ const changeUserPassword = async (req, res) => {
 };
 
 const updateUserAvatar = async (req, res) => {
-  const { _id, avatarPublicId: avatarIdFromDB } = req.user;
-  console.log("avatarIdFromDB:", avatarIdFromDB);
+  const { _id, avatarPublicId: avatarIdFromDB = null } = req.user;
 
   if (!req.file) {
     throw HttpError(400, "Missing the file to upload");
@@ -261,24 +263,21 @@ const updateUserAvatar = async (req, res) => {
   // Path has a URL WITH FILE & extension, where the uploaded file came from (device)
   const { path } = req.file;
 
-  // If there is
+  // If there is a previous avatar public_id in DB, it deletes it, before uploading a new one
   if (avatarIdFromDB) {
-    const deletePrevAvatar = await cloudinary.uploader.destroy(avatarIdFromDB);
-    console.log("deletePrevAvatar:", deletePrevAvatar);
+    await deleteAvatar(avatarIdFromDB);
   }
 
   const { secure_url: avatarURL, public_id: avatarPublicId } =
-    await cloudinary.uploader.upload(path, {
-      transformation: [{ height: 600 }],
-    });
+    await uploadAvatar(path);
 
-  // Deletes the file using the fs.unlink function
+  // Deletes the file from device after uploading, using the fs.unlink function
   fs.unlink(path, (err) => {
     if (err) {
       console.error("Error deleting file:", err);
     }
     // Calls the callback function to proceed with the operation
-    cb(null);
+    cb(null); // eslint-disable-line
   });
 
   const result = await User.findByIdAndUpdate(
@@ -286,7 +285,6 @@ const updateUserAvatar = async (req, res) => {
     { avatarURL, avatarPublicId },
     {
       new: true,
-      select: "email avatarURL", // TODO: do we need it?
     }
   );
 
