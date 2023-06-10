@@ -21,9 +21,7 @@ const getAll = async (req, res) => {
     }
 
      res.status(200).json(findResultByRating)
-  }
-
-  if (filterBy === "owner") {
+  } else if (filterBy === "owner") {
       const findResultByOwner = result.filter(res => {
 
    return res.owner._id.toString() === ownerId.toString()
@@ -33,6 +31,8 @@ const getAll = async (req, res) => {
     }
     
     res.status(200).json(findResultByOwner)
+  } else {
+    res.status(200).json(result)
   }
   
 //   switch (filterBy) {
