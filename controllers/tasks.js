@@ -4,9 +4,6 @@ const { Task } = require("../models/task");
 const getAllTasksByMonth = async (req, res) => {
   const { _id, name, avatarURL } = req.user;
   const { startAt } = req.body;
-  const targetDate = new Date(startAt).toLocaleString("en-US", {
-    timeZone: "Europe/Kiev",
-  });
 
   const assignedUser = {
     userId: _id,
@@ -15,19 +12,30 @@ const getAllTasksByMonth = async (req, res) => {
   };
 
   if (req.query.filter === "byMonth") {
-    console.log(typeof startAt);
-    // const year = startAt.getFullYear();
-    // const month = startAt.getMonth();
+    const targetMonth = new Date(startAt).getMonth();
+    const targetYear = new Date(startAt).getFullYear();
 
-    // const startOfMonth = new Date(year, month, 1);
-    // startOfMonth.setHours(0, 0, 0, 0);
-    // const endOfMonth = new Date(year, month + 1, 0);
-    // endOfMonth.setHours(23, 59, 59, 999);
+    console.log("target month ", targetMonth);
+    console.log("target year ", targetYear);
+
+    const startOfMonth = new Date(targetYear, targetMonth, 1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const startOfMonthKyiv = new Date(
+      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+    );
+
+    const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    const endOfMonthKyiv = new Date(
+      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+    );
 
     const result = await Task.find(
       {
         assignedUser,
-        //startAt: { $gte: startOfMonth, $lt: endOfMonth },
+        startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
       },
       "-createdAt -updatedAt"
     );
@@ -35,6 +43,10 @@ const getAllTasksByMonth = async (req, res) => {
   }
 
   if (req.query.filter === "byDay") {
+    const targetDate = new Date(startAt).toLocaleString("en-US", {
+      timeZone: "Europe/Kiev",
+    });
+
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
 
