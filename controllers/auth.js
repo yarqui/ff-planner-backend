@@ -9,7 +9,7 @@ const {
   deleteAvatar,
 } = require("../cloudinary/cloudinaryOperations");
 
-const { SECRET_KEY, BASE_URL } = process.env;
+const { SECRET_KEY, FRONTEND_URL } = process.env;
 
 const signup = async (req, res) => {
   // First, we check if req.body is not empty, then we check if email is already in use. If it is, we throw custom error message about email in use.
@@ -44,7 +44,7 @@ const signup = async (req, res) => {
   const verificationEmail = {
     to: normalizedEmail,
     subject: "Please verify your email",
-    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">here</a> to verify your email: <strong>${normalizedEmail}</strong></p>`,
+    html: `<p>Click <a target="_blank" href="${FRONTEND_URL}/login/?verificationToken=${verificationToken}">here</a> to verify your email: <strong>${normalizedEmail}</strong></p>`,
   };
 
   // sends verification email
@@ -126,7 +126,7 @@ const verifyEmail = async (req, res) => {
     verificationToken: "",
   });
 
-  res.status(200).json({ message: "Verification successful" });
+  res.redirect(`${FRONTEND_URL}/login`);
 };
 
 const resendVerifyEmail = async (req, res) => {
@@ -136,7 +136,9 @@ const resendVerifyEmail = async (req, res) => {
     throw HttpError(400, "Missing required field email");
   }
 
-  const user = await User.findOne({ email });
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = await User.findOne({ normalizedEmail });
   if (!user) {
     throw HttpError(404, "User not found");
   }
@@ -146,9 +148,9 @@ const resendVerifyEmail = async (req, res) => {
   }
 
   const verificationEmail = {
-    to: email,
+    to: normalizedEmail,
     subject: "Please verify your email",
-    html: `<p>Click <a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationToken}">here</a> to verify your email: <strong>${email}</strong></p>`,
+    html: `<p>Click <a target="_blank" href="${FRONTEND_URL}/login/?verificationToken=${user.verificationToken}">here</a> to verify your email: <strong>${normalizedEmail}</strong></p>`,
   };
 
   // sends verification email
@@ -276,8 +278,6 @@ const updateUserAvatar = async (req, res) => {
     if (err) {
       console.error("Error deleting file:", err);
     }
-    // Calls the callback function to proceed with the operation
-    cb(null);
   });
 
   const result = await User.findByIdAndUpdate(
