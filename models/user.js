@@ -95,9 +95,9 @@ const emailSchema = Joi.object({
 const updateUserSchema = Joi.object({
   name: Joi.string().max(40),
   email: Joi.string().pattern(EMAIL_REGEX),
-  phone: Joi.string().max(20),
-  skype: Joi.string(),
-  birthday: Joi.number(),
+  phone: Joi.string().max(20).allow(""),
+  skype: Joi.string().allow(""),
+  birthday: Joi.number().allow(""),
   theme: Joi.string().valid(...THEME_VALUES),
 }).unknown(true);
 
