@@ -1,22 +1,13 @@
 const { ctrlWrapper, HttpError } = require("../helpers");
 const { Task } = require("../models/task");
 
-const getAllTasksByMonth = async (req, res) => {
-  const { _id, name, avatarURL } = req.user;
+const getTasks = async (req, res) => {
+  const { _id } = req.user;
   const { startAt } = req.body;
-
-  const assignedUser = {
-    userId: _id,
-    userName: name,
-    userAvatar: avatarURL,
-  };
 
   if (req.query.filter === "byMonth") {
     const targetMonth = new Date(startAt).getMonth();
     const targetYear = new Date(startAt).getFullYear();
-
-    console.log("target month ", targetMonth);
-    console.log("target year ", targetYear);
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -34,12 +25,12 @@ const getAllTasksByMonth = async (req, res) => {
 
     const result = await Task.find(
       {
-        assignedUser,
+        "assignedUser._id": _id,
         startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
       },
       "-createdAt -updatedAt"
     );
-    res.json(result);
+    res.status(200).json(result);
   }
 
   if (req.query.filter === "byDay") {
@@ -55,13 +46,13 @@ const getAllTasksByMonth = async (req, res) => {
 
     const result = await Task.find(
       {
-        assignedUser,
+        "assignedUser._id": _id,
         startAt: { $gte: targetDayStart, $lt: targetDayEnd },
       },
       "-createdAt -updatedAt"
     );
 
-    res.json(result);
+    res.status(200).json(result);
   }
 };
 
@@ -69,9 +60,9 @@ const addTask = async (req, res) => {
   const { _id, name, avatarURL } = req.user;
   const { startAt, endAt } = req.body;
   const assignedUser = {
-    userId: _id,
-    userName: name,
-    userAvatar: avatarURL,
+    _id,
+    name,
+    avatarURL,
   };
 
   if (startAt > endAt) {
@@ -95,7 +86,7 @@ const deleteTaskById = async (req, res) => {
     throw HttpError(404);
   }
 
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
+  const receivedUserId = receivedTask.assignedUser._id.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
@@ -128,9 +119,7 @@ const updateTaskById = async (req, res) => {
     throw HttpError(404);
   }
 
-  console.log(receivedTask);
-
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
+  const receivedUserId = receivedTask.assignedUser._id.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
@@ -155,7 +144,7 @@ const updateTaskById = async (req, res) => {
 };
 
 module.exports = {
-  getAllTasksByMonth: ctrlWrapper(getAllTasksByMonth),
+  getTasks: ctrlWrapper(getTasks),
   addTask: ctrlWrapper(addTask),
   deleteTaskById: ctrlWrapper(deleteTaskById),
   updateTaskById: ctrlWrapper(updateTaskById),

@@ -30,16 +30,16 @@ const taskSchema = new Schema(
     },
 
     assignedUser: {
-      userId: {
+      _id: {
         type: Schema.Types.ObjectId,
         ref: "user",
         required: true,
       },
-      userName: {
+      name: {
         type: String,
         required: true,
       },
-      userAvatar: {
+      avatarURL: {
         type: String,
         default: null,
       },
