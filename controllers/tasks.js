@@ -54,7 +54,7 @@ const getTasks = async (req, res) => {
 
     res.status(200).json(result);
   }
-  throw HttpError(401);
+  throw HttpError(501, "The request is not supported");
 };
 
 const addTask = async (req, res) => {
