@@ -54,7 +54,7 @@ const getTasks = async (req, res) => {
 
     res.status(200).json(result);
   }
-  res.status(401);
+  throw HttpError(401);
 };
 
 const addTask = async (req, res) => {
