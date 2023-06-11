@@ -1,27 +1,68 @@
 const { ctrlWrapper, HttpError } = require("../helpers");
 const { Task } = require("../models/task");
 
-const getAllTasksByMonth = async (req, res) => {
-  const { _id, name, avatarURL } = req.user;
+const getTasks = async (req, res) => {
+  const { _id } = req.user;
+  const { startAt } = req.body;
 
-  const assignedUser = {
-    userId: _id,
-    userName: name,
-    userAvatar: avatarURL,
-  };
+  if (req.query.filter === "byMonth") {
+    const targetMonth = new Date(startAt).getMonth();
+    const targetYear = new Date(startAt).getFullYear();
 
-  const result = await Task.find({ assignedUser }, "-createdAt -updatedAt");
+    const startOfMonth = new Date(targetYear, targetMonth, 1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-  res.status(200).json(result);
+    const startOfMonthKyiv = new Date(
+      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+    );
+
+    const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    const endOfMonthKyiv = new Date(
+      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+    );
+
+    const result = await Task.find(
+      {
+        "assignedUser._id": _id,
+        startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
+      },
+      "-createdAt -updatedAt"
+    );
+    res.status(200).json(result);
+  }
+
+  if (req.query.filter === "byDay") {
+    const targetDate = new Date(startAt).toLocaleString("en-US", {
+      timeZone: "Europe/Kiev",
+    });
+
+    const targetDayStart = new Date(targetDate);
+    targetDayStart.setHours(0, 0, 0, 0);
+
+    const targetDayEnd = new Date(targetDate);
+    targetDayEnd.setHours(23, 59, 59, 999);
+
+    const result = await Task.find(
+      {
+        "assignedUser._id": _id,
+        startAt: { $gte: targetDayStart, $lt: targetDayEnd },
+      },
+      "-createdAt -updatedAt"
+    );
+
+    res.status(200).json(result);
+  }
 };
 
 const addTask = async (req, res) => {
   const { _id, name, avatarURL } = req.user;
   const { startAt, endAt } = req.body;
   const assignedUser = {
-    userId: _id,
-    userName: name,
-    userAvatar: avatarURL,
+    _id,
+    name,
+    avatarURL,
   };
 
   if (startAt > endAt) {
@@ -45,7 +86,7 @@ const deleteTaskById = async (req, res) => {
     throw HttpError(404);
   }
 
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
+  const receivedUserId = receivedTask.assignedUser._id.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
@@ -63,7 +104,7 @@ const deleteTaskById = async (req, res) => {
 };
 
 const updateTaskById = async (req, res) => {
-  //const { startAt, endAt } = req.body;
+  const { startAt, endAt } = req.body;
 
   if (Object.keys(req.body).length === 0) {
     throw HttpError(400, "missing fields");
@@ -78,24 +119,19 @@ const updateTaskById = async (req, res) => {
     throw HttpError(404);
   }
 
-  console.log(receivedTask);
-
-  const receivedUserId = receivedTask.assignedUser.userId.toString();
+  const receivedUserId = receivedTask.assignedUser._id.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
   }
 
-  if (req.body.startAt && req.body.startAt > receivedTask.endAt) {
+  if (startAt && startAt > receivedTask.endAt) {
     throw HttpError(404, "End time should be later than start time");
   }
 
-  if (req.body.endAt && req.body.endAt < receivedTask.startAt) {
+  if (endAt && endAt < receivedTask.startAt) {
     throw HttpError(404, "End time should be later than start time");
   }
-  // if (startAt > endAt) {
-  //   throw HttpError(404, "End time should be later than start time");
-  // }
 
   const result = await Task.findOneAndUpdate({ _id: taskId }, req.body, {
     new: true,
@@ -108,7 +144,7 @@ const updateTaskById = async (req, res) => {
 };
 
 module.exports = {
-  getAllTasksByMonth: ctrlWrapper(getAllTasksByMonth),
+  getTasks: ctrlWrapper(getTasks),
   addTask: ctrlWrapper(addTask),
   deleteTaskById: ctrlWrapper(deleteTaskById),
   updateTaskById: ctrlWrapper(updateTaskById),

@@ -28,24 +28,18 @@ const taskSchema = new Schema(
       trim: true,
       required: [true, "Set a title to a task"],
     },
-    // assignedUser: {
-    //   // TODO: we will try to set the userSchema from user.js to match the exact object
-    //   // will it work?
-    //   // type: userSchema,
-    //   type: Object,
-    //   required: [true, "Assign a user to a task"],
-    // },
+
     assignedUser: {
-      userId: {
+      _id: {
         type: Schema.Types.ObjectId,
         ref: "user",
         required: true,
       },
-      userName: {
+      name: {
         type: String,
         required: true,
       },
-      userAvatar: {
+      avatarURL: {
         type: String,
         default: null,
       },

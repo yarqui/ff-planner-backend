@@ -6,7 +6,7 @@ const { taskSchemas } = require("../../models/task");
 
 const router = express.Router();
 
-router.get("/", authenticate, ctrl.getAllTasksByMonth);
+router.get("/", authenticate, ctrl.getTasks);
 
 router.post(
   "/",
