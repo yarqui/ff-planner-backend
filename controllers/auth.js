@@ -31,7 +31,7 @@ const signup = async (req, res) => {
   const verificationToken = await nanoid();
   // If email is unique, we make a request to create a new user;
   const newUser = await User.create({
-    ...req.body,
+    name,
     email: normalizedEmail,
     password: hashedPassword,
     verificationToken,
@@ -193,17 +193,21 @@ const updateUserProfile = async (req, res) => {
     throw HttpError(400, "No data to update with");
   }
 
-  const { email } = req.body;
+  const { theme, name, email, phone, birthday, skype } = req.body;
   // sanitizes email and writes it to req.body
   if (email) {
     const normalizedEmail = email.toLowerCase().trim();
     req.body.email = normalizedEmail;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(_id, req.body, {
-    new: true,
-    select: "id theme name email phone birthday skype avatarURL",
-  });
+  const updatedUser = await User.findByIdAndUpdate(
+    _id,
+    { theme, name, email, phone, birthday, skype },
+    {
+      new: true,
+      select: "id theme name email phone birthday skype avatarURL",
+    }
+  );
 
   if (!updatedUser) {
     throw HttpError(404, "User not found");
@@ -282,7 +286,7 @@ const updateUserAvatar = async (req, res) => {
 
   const result = await User.findByIdAndUpdate(
     _id,
-    { avatarURL },
+    { avatarURL, avatarPublicId },
     {
       new: true,
     }

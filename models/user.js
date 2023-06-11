@@ -78,19 +78,19 @@ const signupSchema = Joi.object({
   name: Joi.string(),
   email: Joi.string().pattern(EMAIL_REGEX).required(),
   password: Joi.string().min(6).required(),
-});
+}).unknown(true);
 
 const loginSchema = Joi.object({
   email: Joi.string().pattern(EMAIL_REGEX).required(),
   password: Joi.string().min(6).required(),
-});
+}).unknown(true);
 
 const emailSchema = Joi.object({
   email: Joi.string().pattern(EMAIL_REGEX).required().messages({
     "string.empty": `"email" cannot be an empty field`,
     "any.required": `missing required field: "email"`,
   }),
-});
+}).unknown(true);
 
 const updateUserSchema = Joi.object({
   name: Joi.string().max(40),
@@ -99,12 +99,12 @@ const updateUserSchema = Joi.object({
   skype: Joi.string(),
   birthday: Joi.number(),
   theme: Joi.string().valid(...THEME_VALUES),
-});
+}).unknown(true);
 
 const userPasswordSchema = Joi.object({
   oldPassword: Joi.string().min(6).required(),
   newPassword: Joi.string().min(6).required(),
-});
+}).unknown(true);
 
 const schemas = {
   signupSchema,
