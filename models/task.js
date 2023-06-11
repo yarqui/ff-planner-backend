@@ -76,7 +76,7 @@ const addTaskSchema = Joi.object({
   category: Joi.string()
     .valid(...CATEGORY_VALUES)
     .required(),
-});
+}).unknown(true);
 
 const updateTaskSchema = Joi.object({
   startAt: Joi.number(),
@@ -84,7 +84,7 @@ const updateTaskSchema = Joi.object({
   title: Joi.string(),
   priority: Joi.string().valid(...PRIORITY_VALUES),
   category: Joi.string().valid(...CATEGORY_VALUES),
-});
+}).unknown(true);
 
 const taskSchemas = {
   addTaskSchema,

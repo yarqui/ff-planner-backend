@@ -11,13 +11,13 @@ const reviewSchema = new Schema(
       required: [true, "Comment is required"],
     },
     rating: {
-        type: Number,
-        required: [true, "Rating is required"],
+      type: Number,
+      required: [true, "Rating is required"],
     },
     owner: {
       type: Object,
       required: [true, "Comment's owner is required"],
-    }
+    },
   },
   {
     // removes "_v" and adds creation and changing timestamps to document
@@ -32,12 +32,13 @@ reviewSchema.post("save", handleMongooseError);
 // model() method creates a model of the Schema. It is a Class, so we use capital letter. 1st argument - name of the collection of DB in a ❗single form, 2nd - schema
 const Review = model("review", reviewSchema);
 
-const addSchema = joi.object({
- 
-  comment: joi.string().min(3).max(800).required(),
-  owner: joi.object(),
-  rating: joi.number().min(1).max(5).required(),
+const addSchema = joi
+  .object({
+    comment: joi.string().min(3).max(800).required(),
+    owner: joi.object(),
+    rating: joi.number().min(1).max(5).required(),
   })
+  .unknown(true);
 
 module.exports = {
   Review,

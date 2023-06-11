@@ -59,7 +59,7 @@ const getTasks = async (req, res) => {
 
 const addTask = async (req, res) => {
   const { _id, name, avatarURL } = req.user;
-  const { startAt, endAt } = req.body;
+  const { startAt, endAt, title, priority, category } = req.body;
   const assignedUser = {
     _id,
     name,
@@ -71,7 +71,11 @@ const addTask = async (req, res) => {
   }
 
   const result = await Task.create({
-    ...req.body,
+    startAt,
+    endAt,
+    title,
+    priority,
+    category,
     assignedUser,
   });
   res.status(201).json(result);
@@ -105,7 +109,7 @@ const deleteTaskById = async (req, res) => {
 };
 
 const updateTaskById = async (req, res) => {
-  const { startAt, endAt } = req.body;
+  const { startAt, endAt, title, priority, category } = req.body;
 
   if (Object.keys(req.body).length === 0) {
     throw HttpError(400, "missing fields");
@@ -134,9 +138,13 @@ const updateTaskById = async (req, res) => {
     throw HttpError(404, "End time should be later than start time");
   }
 
-  const result = await Task.findOneAndUpdate({ _id: taskId }, req.body, {
-    new: true,
-  });
+  const result = await Task.findOneAndUpdate(
+    { _id: taskId },
+    { startAt, endAt, title, priority, category },
+    {
+      new: true,
+    }
+  );
 
   if (!result) {
     throw HttpError(404);
