@@ -165,6 +165,7 @@ const getCurrentUser = async (req, res) => {
     theme,
     name,
     email,
+    phone,
     birthday,
     skype,
     avatarURL,
@@ -176,7 +177,7 @@ const getCurrentUser = async (req, res) => {
   }
 
   res.status(200).json({
-    user: { id, theme, name, email, birthday, skype, avatarURL },
+    user: { id, theme, name, email, phone, birthday, skype, avatarURL },
   });
 };
 
