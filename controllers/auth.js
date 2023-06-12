@@ -126,7 +126,7 @@ const verifyEmail = async (req, res) => {
     verificationToken: "",
   });
 
-  res.redirect(`${FRONTEND_URL}/login`);
+  res.status(200).json("Verification successful");
 };
 
 const resendVerifyEmail = async (req, res) => {
