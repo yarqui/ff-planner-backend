@@ -3,12 +3,12 @@ const { Task } = require("../models/task");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
-  const { filter, startAt } = req.query;
-  const convertedStartAt = +startAt; // a value from query string is a string, so we have to convert it to Number
+  const { filter, date } = req.query;
+  const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
 
   if (filter === "byMonth") {
-    const targetMonth = new Date(convertedStartAt).getMonth();
-    const targetYear = new Date(convertedStartAt).getFullYear();
+    const targetMonth = new Date(convertedDate).getMonth();
+    const targetYear = new Date(convertedDate).getFullYear();
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -36,7 +36,7 @@ const getTasks = async (req, res) => {
   }
 
   if (filter === "byDay") {
-    const targetDate = new Date(convertedStartAt).toLocaleString("en-US", {
+    const targetDate = new Date(convertedDate).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
     });
 
