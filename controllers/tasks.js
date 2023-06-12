@@ -3,11 +3,12 @@ const { Task } = require("../models/task");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
-  const { startAt } = req.body;
+  const { filter, startAt } = req.query;
+  const convertedStartAt = +startAt; // a value from query string is a string, so we have to convert it to Number
 
-  if (req.query.filter === "byMonth") {
-    const targetMonth = new Date(startAt).getMonth();
-    const targetYear = new Date(startAt).getFullYear();
+  if (filter === "byMonth") {
+    const targetMonth = new Date(convertedStartAt).getMonth();
+    const targetYear = new Date(convertedStartAt).getFullYear();
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -31,10 +32,11 @@ const getTasks = async (req, res) => {
       "-createdAt -updatedAt"
     );
     res.status(200).json(result);
+    return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
   }
 
-  if (req.query.filter === "byDay") {
-    const targetDate = new Date(startAt).toLocaleString("en-US", {
+  if (filter === "byDay") {
+    const targetDate = new Date(convertedStartAt).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
     });
 
@@ -53,6 +55,7 @@ const getTasks = async (req, res) => {
     );
 
     res.status(200).json(result);
+    return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
   }
   throw HttpError(501, "The request is not supported");
 };
