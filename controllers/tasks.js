@@ -46,6 +46,8 @@ const getTasks = async (req, res) => {
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
 
+    console.log("target date", targetDate);
+
     const result = await Task.find(
       {
         "assignedUser._id": _id,
@@ -70,7 +72,7 @@ const addTask = async (req, res) => {
   };
 
   if (startAt > endAt) {
-    throw HttpError(404, "End time should be later than start time");
+    throw HttpError(400, "End time should be later than start time");
   }
 
   const result = await Task.create({
@@ -134,11 +136,11 @@ const updateTaskById = async (req, res) => {
   }
 
   if (startAt && startAt > receivedTask.endAt) {
-    throw HttpError(404, "End time should be later than start time");
+    throw HttpError(400, "End time should be later than start time");
   }
 
   if (endAt && endAt < receivedTask.startAt) {
-    throw HttpError(404, "End time should be later than start time");
+    throw HttpError(400, "End time should be later than start time");
   }
 
   const result = await Task.findOneAndUpdate(
