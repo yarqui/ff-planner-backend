@@ -1,0 +1,28 @@
+{
+  "openapi": "3.0.1",
+  "servers": [
+    {
+      "url": "https://ff-planner.onrender.com/api"
+    }
+  ],
+  "info": {
+    "description": "This is a simple API",
+    "version": "1.0.0-oas3.1",
+    "title": "Simple Inventory API",
+    "contact": {
+      "email": "y.pelykh@gmail.com"
+    }
+  },
+  "consumes": ["multipart/form-data"],
+  "tags": [
+    {
+      "name": "users"
+    },
+    {
+      "name": "tasks"
+    },
+    {
+      "name": "reviews"
+    }
+  ]
+}
