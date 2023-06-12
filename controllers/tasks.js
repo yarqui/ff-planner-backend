@@ -3,10 +3,10 @@ const { Task } = require("../models/task");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
-  const { filter, date } = req.query;
+  const { filterBy, date } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
 
-  if (filter === "byMonth") {
+  if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
     const targetYear = new Date(convertedDate).getFullYear();
 
@@ -35,7 +35,7 @@ const getTasks = async (req, res) => {
     return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
   }
 
-  if (filter === "byDay") {
+  if (filterBy === "day") {
     const targetDate = new Date(convertedDate).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
     });
