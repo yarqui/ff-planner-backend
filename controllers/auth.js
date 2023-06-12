@@ -163,6 +163,7 @@ const getCurrentUser = async (req, res) => {
   const {
     _id: idFromToken,
     theme,
+    language,
     name,
     email,
     phone,
@@ -177,7 +178,17 @@ const getCurrentUser = async (req, res) => {
   }
 
   res.status(200).json({
-    user: { id, theme, name, email, phone, birthday, skype, avatarURL },
+    user: {
+      id,
+      theme,
+      language,
+      name,
+      email,
+      phone,
+      birthday,
+      skype,
+      avatarURL,
+    },
   });
 };
 
@@ -194,7 +205,7 @@ const updateUserProfile = async (req, res) => {
     throw HttpError(400, "No data to update with");
   }
 
-  const { theme, name, email, phone, birthday, skype } = req.body;
+  const { theme, name, email, phone, birthday, skype, language } = req.body;
   // sanitizes email and writes it to req.body
   if (email) {
     const normalizedEmail = email.toLowerCase().trim();
@@ -203,10 +214,10 @@ const updateUserProfile = async (req, res) => {
 
   const updatedUser = await User.findByIdAndUpdate(
     _id,
-    { theme, name, email, phone, birthday, skype },
+    { theme, name, email, phone, birthday, skype, language },
     {
       new: true,
-      select: "id theme name email phone birthday skype avatarURL",
+      select: "id theme language name email phone birthday skype avatarURL",
     }
   );
 
