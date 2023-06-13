@@ -1,28 +1,1123 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "servers": [
     {
       "url": "https://ff-planner.onrender.com/api"
+    },
+    {
+      "url": "http://localhost:3000/api"
     }
   ],
   "info": {
-    "description": "This is a simple API",
-    "version": "1.0.0-oas3.1",
-    "title": "Simple Inventory API",
+    "description": "This is a Founding Feathers Planner team project API",
+    "version": "1.0.0",
+    "title": "Founding Feathers Planner API",
     "contact": {
       "email": "y.pelykh@gmail.com"
     }
   },
-  "consumes": ["multipart/form-data"],
-  "tags": [
-    {
-      "name": "users"
+  "paths": {
+    "/users/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registration successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Unsuccessful. Email is already in use"
+          },
+          "422": {
+            "description": "Unsuccessful. Unprocessable Content"
+          }
+        },
+        "tags": ["Authentication"]
+      }
     },
-    {
-      "name": "tasks"
+    "/users/login": {
+      "post": {
+        "summary": "Log in a registered & verified user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "theme": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "birthday": {
+                          "type": "number"
+                        },
+                        "skype": {
+                          "type": "string"
+                        },
+                        "avatarURL": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or Email or password is wrong"
+          },
+          "403": {
+            "description": "Email is not verified"
+          },
+          "404": {
+            "description": "There is no such user with this email"
+          }
+        },
+        "tags": ["Authentication"]
+      }
     },
-    {
-      "name": "reviews"
+    "/users/logout": {
+      "post": {
+        "summary": "User logout",
+        "responses": {
+          "204": {
+            "description": "User logout successful"
+          }
+        },
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/verify/{verificationToken}": {
+      "get": {
+        "summary": "Verify user email",
+        "parameters": [
+          {
+            "name": "verificationToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User email verification successful"
+          }
+        },
+        "tags": ["Authentication"]
+      }
+    },
+    "/users/verify": {
+      "post": {
+        "summary": "Resend verification email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK. Verification email sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required field email or Verification has already been passed"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": ["Authentication"]
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "summary": "Get current user data",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update user profile",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/UpdateUserSchema"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsuccessful. No data to update with"
+          },
+          "401": {
+            "description": "Unsuccessful. Not authorized to perform this action"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{userId}/password": {
+      "patch": {
+        "summary": "Change user password",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPasswordSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsuccessful. No data to update with or Old password is wrong or Email or password is wrong"
+          },
+          "401": {
+            "description": "Unsuccessful. Not authorized to perform this action"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/avatar": {
+      "patch": {
+        "summary": "Upload user avatar",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User avatar uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "avatarURL": {
+                      "type": "string"
+                    },
+                    "avatarPublicId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing the file to upload"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tasks": {
+      "get": {
+        "summary": "Get tasks of logged in user",
+        "description": "Retrieves tasks based on the provided filterBy and date parameters.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filterBy",
+            "description": "Filter user tasks by \"month\" or \"day\"",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["month", "day"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "description": "Date in UNIX timestamp format",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskSchema"
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "The request is not supported"
+          }
+        },
+        "tags": ["Task"]
+      },
+      "post": {
+        "summary": "Add a new task",
+        "description": "Adds a new task to the database",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskRequestSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "End time should be later than start time"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": ["Task"]
+      }
+    },
+    "/tasks/{taskId}": {
+      "delete": {
+        "summary": "Delete a task by ID",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "ID of the task to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task is deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Requesting user does not have permission to delete the task."
+          },
+          "404": {
+            "description": "Task not found."
+          }
+        },
+        "tags": ["Task"]
+      },
+      "patch": {
+        "summary": "Update a task by ID",
+        "description": "Updates the specified task with the provided data",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "ID of the task to update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskRequestSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Invalid data provided."
+          },
+          "401": {
+            "description": "Unauthorized. User is not authorized to update the task."
+          },
+          "404": {
+            "description": "Not Found. Task not found."
+          }
+        },
+        "tags": ["Task"]
+      }
+    },
+    "/reviews": {
+      "get": {
+        "tags": ["Review"],
+        "summary": "Get all reviews",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of reviews per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 20
+            }
+          },
+          {
+            "name": "filterBy",
+            "in": "query",
+            "description": "Filter reviews by owner or by the best reviews",
+            "schema": {
+              "type": "string",
+              "enum": ["owner", "best"]
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "query",
+            "description": "ID of the owner (applicable when filterBy is \"owner\")",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewResponseSchema"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Reviews not found"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Review"],
+        "summary": "Add a review",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequestSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/reviews/{reviewId}": {
+      "patch": {
+        "tags": ["Review"],
+        "summary": "Update a review",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequestSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseSchema"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not the owner of the review"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Review"],
+        "summary": "Delete a review",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not the owner of the review"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        }
+      }
     }
-  ]
+  },
+  "components": {
+    "schemas": {
+      "SignupSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          }
+        },
+        "required": ["name", "email", "password"]
+      },
+      "LoginSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "EmailSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": ["email"]
+      },
+      "UserProfileSchema": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string",
+                "maxLength": 20
+              },
+              "birthday": {
+                "type": "number"
+              },
+              "skype": {
+                "type": "string"
+              },
+              "avatarURL": {
+                "type": "string"
+              },
+              "theme": {
+                "type": "string",
+                "enum": ["light", "dark"]
+              },
+              "language": {
+                "type": "string",
+                "enum": ["uk", "en"]
+              }
+            }
+          }
+        }
+      },
+      "UpdateUserSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "birthday": {
+            "type": "number"
+          },
+          "skype": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark"]
+          },
+          "language": {
+            "type": "string",
+            "enum": ["uk", "en"]
+          }
+        }
+      },
+      "UserPasswordSchema": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          }
+        },
+        "required": ["oldPassword", "newPassword"]
+      },
+      "TaskSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "integer",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "endAt": {
+            "type": "integer",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "assignedUser": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "avatarURL": {
+                "type": "string"
+              }
+            }
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["to-do", "in-progress", "done"]
+          },
+          "createdAt": {
+            "type": "number",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "number",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "startAt",
+          "endAt",
+          "title",
+          "assignedUser",
+          "priority",
+          "category"
+        ]
+      },
+      "TaskRequestSchema": {
+        "type": "object",
+        "properties": {
+          "startAt": {
+            "type": "number",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "endAt": {
+            "type": "number",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["to-do", "in-progress", "done"]
+          }
+        },
+        "required": ["startAt", "endAt", "title", "priority", "category"]
+      },
+      "TaskResponseSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "number",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "endAt": {
+            "type": "number",
+            "format": "int64",
+            "pattern": "^\\d{10}$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["to-do", "in-progress", "done"]
+          },
+          "assignedUser": {
+            "$ref": "#/components/schemas/AssignedUserSchema"
+          }
+        }
+      },
+      "AssignedUserSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "avatarURL": {
+            "type": "string"
+          }
+        },
+        "required": ["_id", "name", "avatarURL"]
+      },
+      "ReviewResponseSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 800
+          },
+          "rating": {
+            "type": "number",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "owner": {
+            "$ref": "#/components/schemas/ReviewOwnerSchema"
+          }
+        },
+        "required": ["_id", "comment", "rating", "owner"]
+      },
+      "ReviewRequestSchema": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 800
+          },
+          "rating": {
+            "type": "number",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "required": ["comment", "rating"]
+      },
+      "ReviewOwnerSchema": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarURL": {
+            "type": "string"
+          }
+        },
+        "required": ["_id", "name", "email", "avatarURL"]
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
 }

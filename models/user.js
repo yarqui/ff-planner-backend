@@ -81,7 +81,7 @@ const userSchema = new Schema(
 userSchema.post("save", handleMongooseError);
 
 const signupSchema = Joi.object({
-  name: Joi.string().max(40),
+  name: Joi.string().max(40).required(),
   email: Joi.string().pattern(EMAIL_REGEX).required(),
   password: Joi.string().min(6).required(),
 }).unknown(true);
