@@ -135,11 +135,15 @@ const updateTaskById = async (req, res) => {
     throw HttpError(401);
   }
 
-  if (startAt && startAt > receivedTask.endAt) {
+  if (startAt && endAt && startAt > endAt) {
     throw HttpError(400, "End time should be later than start time");
   }
 
-  if (endAt && endAt < receivedTask.startAt) {
+  if (startAt && !endAt && startAt > receivedTask.endAt) {
+    throw HttpError(400, "End time should be later than start time");
+  }
+
+  if (endAt && !startAt && endAt < receivedTask.startAt) {
     throw HttpError(400, "End time should be later than start time");
   }
 
