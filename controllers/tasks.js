@@ -42,10 +42,10 @@ const getTasks = async (req, res) => {
   }
 
   if (filterBy === "day") {
-    const targetDate = new Date(convertedDate);
-    // const targetDate = new Date(convertedDate).toLocaleString("en-US", {
-    //   timeZone: "Europe/Kiev",
-    //   }); // ❗ although without toLocaleString targetDayStart & targetDayEnd are 3 hours earlier, it sends correct dates in response
+    // const targetDate = new Date(convertedDate);
+    const targetDate = new Date(convertedDate).toLocaleString("en-US", {
+      timeZone: "Europe/Kiev",
+    }); // ❗ although without toLocaleString targetDayStart & targetDayEnd are 3 hours earlier, it sends correct dates in response
     console.log("targetDate byDay:", targetDate);
 
     const targetDayStart = new Date(targetDate);
@@ -57,7 +57,7 @@ const getTasks = async (req, res) => {
     const targetDayEnd = new Date(targetDate);
     console.log("targetDayEnd 1 byDay:", targetDayEnd);
     // targetDayEnd.setHours(23, 59, 59, 999); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
-    targetDayEnd.setHours(4, 59, 59, 999); // ❗ in dev it doesn't work, but in production it's ok
+    targetDayEnd.setHours(2, 59, 59, 999); // ❗ in dev it doesn't work, but in production it's ok
     console.log("targetDayEnd byDay:", targetDayEnd);
 
     const result = await Task.find(
