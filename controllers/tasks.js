@@ -12,17 +12,21 @@ const getTasks = async (req, res) => {
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setHours(0, 0, 0, 0);
+    console.log("startOfMonth byMonth:", startOfMonth);
 
     const startOfMonthKyiv = new Date(
-      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" }) // FIXME: do we need startOfMonthKyiv? It's the same as startOfMonth
     );
+    console.log("startOfMonthKyiv byMonth:", startOfMonthKyiv);
 
     const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
     endOfMonth.setHours(23, 59, 59, 999);
+    console.log("endOfMonth byMonth:", endOfMonth);
 
     const endOfMonthKyiv = new Date(
-      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" }) // FIXME: do we need endOfMonthKyiv? It's the same as endOfMonthKyiv
     );
+    console.log("endOfMonthKyiv byMonth:", endOfMonthKyiv);
 
     const result = await Task.find(
       {
@@ -36,17 +40,19 @@ const getTasks = async (req, res) => {
   }
 
   if (filterBy === "day") {
-    const targetDate = new Date(convertedDate).toLocaleString("en-US", {
-      timeZone: "Europe/Kiev",
-    });
+    const targetDate = new Date(convertedDate);
+    // const targetDate = new Date(convertedDate).toLocaleString("en-US", {
+    //   timeZone: "Europe/Kiev",
+    //   }); // ❗ although without toLocaleString targetDayStart & targetDayEnd are 3 hours earlier, it sends correct dates in response
+    console.log("targetDate byDay:", targetDate);
 
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
+    console.log("targetDayStart byDay:", targetDayStart);
 
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
-
-    console.log("target date", targetDate);
+    console.log("targetDayEnd byDay:", targetDayEnd);
 
     const result = await Task.find(
       {
