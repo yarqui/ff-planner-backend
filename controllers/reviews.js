@@ -42,7 +42,7 @@ const addReview = async (req, res) => {
 
   const result = await Review.create({ comment, rating, owner });
   if (!result) {
-    throw HttpError(404);
+    throw HttpError(400);
   }
 
   res.status(201).json(result);
