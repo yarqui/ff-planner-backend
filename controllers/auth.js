@@ -66,17 +66,17 @@ const login = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw HttpError(401, "Email or password is wrong");
+    throw HttpError(404, "There is no such user with this email");
   }
 
   if (!user.verified) {
-    throw HttpError(401, "Email is not verified");
+    throw HttpError(403, "Email is not verified");
   }
 
   // compares if password in DB is the same as password in request. If it is, it returns true.
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
-    throw HttpError(401, "Email or password is wrong");
+    throw HttpError(400, "Email or password is wrong");
   }
   // creates a payload to generate token, usually it's an id. !!!It's forbidden to save secret data in payload, because it's easy to decode a token
   const payload = {
@@ -244,12 +244,12 @@ const changeUserPassword = async (req, res) => {
 
   const user = await User.findById(_id);
   if (!user) {
-    throw HttpError(401);
+    throw HttpError(404);
   }
   // compares if password in DB is the same as password in request. If it is, it returns true.
   const passwordCompare = await bcrypt.compare(oldPassword, user.password);
   if (!passwordCompare) {
-    throw HttpError(401, "Old password is wrong");
+    throw HttpError(400, "Old password is wrong");
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -266,7 +266,7 @@ const changeUserPassword = async (req, res) => {
   );
 
   if (!updatedUser) {
-    throw HttpError(401, "Email or password is wrong");
+    throw HttpError(400, "Email or password is wrong");
   }
 
   res.status(200).json({ user: updatedUser });
