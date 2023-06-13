@@ -50,14 +50,14 @@ const getTasks = async (req, res) => {
 
     const targetDayStart = new Date(targetDate);
     console.log("targetDayStart 1 byDay:", targetDayStart);
-    // targetDayStart.setHours(0, 0, 0, 0); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
-    targetDayStart.setHours(3, 0, 0, 0); // ❗ in dev it doesn't work, but in production it's ok
+    targetDayStart.setHours(0, 0, 0, 0); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
+    // targetDayStart.setHours(3, 0, 0, 0); // ❗ in dev it doesn't work, but in production it's ok
     console.log("targetDayStart byDay:", targetDayStart);
 
     const targetDayEnd = new Date(targetDate);
     console.log("targetDayEnd 1 byDay:", targetDayEnd);
-    // targetDayEnd.setHours(23, 59, 59, 999); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
-    targetDayEnd.setHours(4, 59, 59, 999); // ❗ in dev it doesn't work, but in production it's ok
+    targetDayEnd.setHours(23, 59, 59, 999); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
+    // targetDayEnd.setHours(4, 59, 59, 999); // ❗ in dev it doesn't work, but in production it's ok
     console.log("targetDayEnd byDay:", targetDayEnd);
 
     const result = await Task.find(
