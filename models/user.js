@@ -17,7 +17,7 @@ const userSchema = new Schema(
     language: {
       type: String,
       enum: LANG_VALUES,
-      default: THEME_VALUES[1],
+      default: LANG_VALUES[1],
     },
     name: {
       type: String,
