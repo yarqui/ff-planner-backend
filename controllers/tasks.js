@@ -5,8 +5,6 @@ const getTasks = async (req, res) => {
   const { _id } = req.user;
   const { filterBy, date } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
-  console.log("date:", date);
-  console.log("convertedDate:", convertedDate);
 
   if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
@@ -14,21 +12,17 @@ const getTasks = async (req, res) => {
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setHours(0, 0, 0, 0);
-    console.log("startOfMonth byMonth:", startOfMonth);
 
     const startOfMonthKyiv = new Date(
-      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" }) // FIXME: do we need startOfMonthKyiv? It's the same as startOfMonth
+      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
     );
-    console.log("startOfMonthKyiv byMonth:", startOfMonthKyiv);
 
     const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
     endOfMonth.setHours(23, 59, 59, 999);
-    console.log("endOfMonth byMonth:", endOfMonth);
 
     const endOfMonthKyiv = new Date(
-      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" }) // FIXME: do we need endOfMonthKyiv? It's the same as endOfMonthKyiv
+      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
     );
-    console.log("endOfMonthKyiv byMonth:", endOfMonthKyiv);
 
     const result = await Task.find(
       {
@@ -42,23 +36,17 @@ const getTasks = async (req, res) => {
   }
 
   if (filterBy === "day") {
-    // const targetDate = new Date(convertedDate);
     const targetDate = new Date(convertedDate).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
-    }); // ❗ although without toLocaleString targetDayStart & targetDayEnd are 3 hours earlier, it sends correct dates in response
-    console.log("targetDate byDay:", targetDate);
+    });
 
-    // const targetDayStart = new Date(targetDate);
-    const targetDayStart = new Date(convertedDate);
-    console.log("targetDayStart 1 byDay:", targetDayStart);
-    targetDayStart.setHours(0, 0, 0, 0); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
-    console.log("targetDayStart byDay:", targetDayStart);
+    const targetDayStart = new Date(targetDate);
+    targetDayStart.setHours(0, 0, 0, 0);
 
-    // const targetDayEnd = new Date(targetDate);
-    const targetDayEnd = new Date(convertedDate);
-    console.log("targetDayEnd 1 byDay:", targetDayEnd);
-    targetDayEnd.setHours(23, 59, 59, 999); // ❗ in production it sends 3 hour earlier date, but in dev it's ok
-    console.log("targetDayEnd byDay:", targetDayEnd);
+    const targetDayEnd = new Date(targetDate);
+    targetDayEnd.setHours(23, 59, 59, 999);
+
+    console.log("target date", targetDate);
 
     const result = await Task.find(
       {
