@@ -1,6 +1,7 @@
 const { ctrlWrapper, HttpError } = require("../helpers");
 const mongoose = require("mongoose");
 const { Review } = require("../models/review");
+const { User } = require("../models/user");
 
 // ----------------------- Get All --------------------------
 const getAll = async (req, res) => {
@@ -10,37 +11,45 @@ const getAll = async (req, res) => {
   const filter = {};
 
   if (filterBy === "owner" && ownerId) {
-    filter["owner._id"] = new mongoose.Types.ObjectId(ownerId);
+    filter["ownerId"] = new mongoose.Types.ObjectId(ownerId);
   }
 
   if (filterBy === "best") {
     filter.rating = { $gte: 4 };
   }
 
+  console.log("filter:", filter);
+
   const result = await Review.find(filter, "-createdAt -updatedAt", {
     skip,
     limit,
   });
 
+  const userIdFromResult = result[0].ownerId;
+  console.log("userIdFromResult:", userIdFromResult);
+
   if (!result) {
     throw HttpError(404);
   }
 
-  res.status(200).json(result);
+  const { name, avatarURL } = await User.findById(ownerId || userIdFromResult);
+
+  res.status(200).json({ result, userDTO: { name, avatarURL } });
 };
 
 // ------------------ Add Review --------------------------
 const addReview = async (req, res) => {
-  const { _id, name, email, avatarURL } = req.user;
+  const { _id: ownerId, name, email, avatarURL } = req.user;
+  // const { _id, name, email, avatarURL } = req.user;
   const { comment, rating } = req.body;
-  const owner = {
-    name,
-    avatarURL,
-    email,
-    _id,
-  };
+  // const owner = {
+  //   name,
+  //   avatarURL,
+  //   email,
+  //   _id,
+  // };
 
-  const result = await Review.create({ comment, rating, owner });
+  const result = await Review.create({ comment, rating, ownerId });
   if (!result) {
     throw HttpError(400);
   }
