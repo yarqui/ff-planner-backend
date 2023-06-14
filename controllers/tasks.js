@@ -1,11 +1,12 @@
 const { ctrlWrapper, HttpError } = require("../helpers");
 const { Task } = require("../models/task");
+const { User } = require("../models/user");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
+  console.log("_id:", _id);
   const { filterBy, date } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
-  console.log("convertedDate:", convertedDate);
 
   if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
@@ -25,14 +26,35 @@ const getTasks = async (req, res) => {
       endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
     );
 
-    const result = await Task.find(
+    const filteredTasks = await Task.find(
       {
-        "assignedUser._id": _id,
+        assignedUserId: _id,
         startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
       },
       "-createdAt -updatedAt"
     );
-    res.status(200).json(result);
+
+    const usersFromTasks = await Promise.all(
+      Array.from(
+        new Set(filteredTasks.map(({ assignedUserId }) => assignedUserId))
+      ).map((id) => User.findById(id, "_id name avatarURL "))
+    );
+
+    const updatedTasks = filteredTasks.map(
+      ({ assignedUserId, _id, startAt, endAt, title, priority, category }) => ({
+        _id,
+        startAt,
+        endAt,
+        title,
+        priority,
+        category,
+        assignedUserId: Array.from(usersFromTasks).find(
+          ({ _id }) => _id.toString() === assignedUserId
+        ),
+      })
+    );
+
+    res.status(200).json(updatedTasks);
     return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
   }
 
@@ -54,9 +76,9 @@ const getTasks = async (req, res) => {
     console.log("targetDayEnd:", targetDayEnd);
     console.log("targetDayEnd:", targetDayEnd.getTime());
 
-    const result = await Task.find(
+    const filteredTasks = await Task.find(
       {
-        "assignedUser._id": _id,
+        assignedUserId: _id,
         startAt: {
           $gte: targetDayStart.getTime(),
           $lt: targetDayEnd.getTime(),
@@ -65,20 +87,35 @@ const getTasks = async (req, res) => {
       "-createdAt -updatedAt"
     );
 
-    res.status(200).json(result);
+    const usersFromTasks = await Promise.all(
+      Array.from(
+        new Set(filteredTasks.map(({ assignedUserId }) => assignedUserId))
+      ).map((id) => User.findById(id, "_id name avatarURL "))
+    );
+
+    const updatedTasks = filteredTasks.map(
+      ({ assignedUserId, _id, startAt, endAt, title, priority, category }) => ({
+        _id,
+        startAt,
+        endAt,
+        title,
+        priority,
+        category,
+        assignedUserId: Array.from(usersFromTasks).find(
+          ({ _id }) => _id.toString() === assignedUserId
+        ),
+      })
+    );
+
+    res.status(200).json(updatedTasks);
     return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
   }
   throw HttpError(501, "The request is not supported");
 };
 
 const addTask = async (req, res) => {
-  const { _id, name, avatarURL } = req.user;
+  const { _id: assignedUserId } = req.user;
   const { startAt, endAt, title, priority, category } = req.body;
-  const assignedUser = {
-    _id,
-    name,
-    avatarURL,
-  };
 
   if (startAt > endAt) {
     throw HttpError(400, "End time should be later than start time");
@@ -90,8 +127,9 @@ const addTask = async (req, res) => {
     title,
     priority,
     category,
-    assignedUser,
+    assignedUserId,
   });
+
   res.status(201).json(result);
 };
 

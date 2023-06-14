@@ -14,8 +14,8 @@ const reviewSchema = new Schema(
       type: Number,
       required: [true, "Rating is required"],
     },
-    owner: {
-      type: Object,
+    ownerId: {
+      type: String,
       required: [true, "Comment's owner is required"],
     },
   },
@@ -35,7 +35,7 @@ const Review = model("review", reviewSchema);
 const addSchema = joi
   .object({
     comment: joi.string().min(3).max(800).required(),
-    owner: joi.object(),
+    ownerId: joi.string(), // FIXME: do we need it?
     rating: joi.number().min(1).max(5).required(),
   })
   .unknown(true);

@@ -29,20 +29,9 @@ const taskSchema = new Schema(
       required: [true, "Set a title to a task"],
     },
 
-    assignedUser: {
-      _id: {
-        type: Schema.Types.ObjectId,
-        ref: "user",
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true,
-      },
-      avatarURL: {
-        type: String,
-        default: null,
-      },
+    assignedUserId: {
+      type: String,
+      required: [true, "assignedUserId is required"],
     },
     priority: {
       type: String,
