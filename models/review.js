@@ -18,10 +18,6 @@ const reviewSchema = new Schema(
       type: String,
       required: [true, "Comment's owner is required"],
     },
-    // owner: {
-    //   type: Object,
-    //   required: [true, "Comment's owner is required"],
-    // },
   },
   {
     // removes "_v" and adds creation and changing timestamps to document
@@ -39,8 +35,7 @@ const Review = model("review", reviewSchema);
 const addSchema = joi
   .object({
     comment: joi.string().min(3).max(800).required(),
-    ownerId: joi.string(),
-    // owner: joi.object(),
+    ownerId: joi.string(), // FIXME: do we need it?
     rating: joi.number().min(1).max(5).required(),
   })
   .unknown(true);

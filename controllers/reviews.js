@@ -11,45 +11,45 @@ const getAll = async (req, res) => {
   const filter = {};
 
   if (filterBy === "owner" && ownerId) {
-    filter["ownerId"] = new mongoose.Types.ObjectId(ownerId);
+    filter.ownerId = new mongoose.Types.ObjectId(ownerId);
   }
 
   if (filterBy === "best") {
     filter.rating = { $gte: 4 };
   }
 
-  console.log("filter:", filter);
-
-  const result = await Review.find(filter, "-createdAt -updatedAt", {
+  const filteredReviews = await Review.find(filter, "-createdAt -updatedAt", {
     skip,
     limit,
   });
 
-  const userIdFromResult = result[0].ownerId;
-  console.log("userIdFromResult:", userIdFromResult);
+  const usersFromReviews = await Promise.all(
+    Array.from(new Set(filteredReviews.map(({ ownerId }) => ownerId))).map(
+      (id) => User.findById(id, "_id name email avatarURL ")
+    )
+  );
 
-  if (!result) {
-    throw HttpError(404);
-  }
+  const updatedReviews = filteredReviews.map(
+    ({ ownerId, _id, comment, rating }) => ({
+      _id,
+      comment,
+      rating,
+      owner: Array.from(usersFromReviews).find(
+        ({ _id }) => _id.toString() === ownerId
+      ),
+    })
+  );
 
-  const { name, avatarURL } = await User.findById(ownerId || userIdFromResult);
-
-  res.status(200).json({ result, userDTO: { name, avatarURL } });
+  res.status(200).json(updatedReviews);
 };
 
 // ------------------ Add Review --------------------------
 const addReview = async (req, res) => {
-  const { _id: ownerId, name, email, avatarURL } = req.user;
-  // const { _id, name, email, avatarURL } = req.user;
+  const { _id: ownerId } = req.user;
   const { comment, rating } = req.body;
-  // const owner = {
-  //   name,
-  //   avatarURL,
-  //   email,
-  //   _id,
-  // };
 
   const result = await Review.create({ comment, rating, ownerId });
+
   if (!result) {
     throw HttpError(400);
   }
