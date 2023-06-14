@@ -42,11 +42,13 @@ const getTasks = async (req, res) => {
     });
     console.log("targetDate:", targetDate);
 
+    // const targetDayStart = new Date(targetDate);
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
     console.log("targetDayStart:", targetDayStart);
     console.log("targetDayStart:", targetDayStart.getTime());
 
+    // const targetDayEnd = new Date(targetDate);
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
     console.log("targetDayEnd:", targetDayEnd);
