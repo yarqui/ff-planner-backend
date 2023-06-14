@@ -52,14 +52,14 @@ const getTasks = async (req, res) => {
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
     console.log("targetDayEnd:", targetDayEnd);
-    console.log("targetDayEnd:", targetDayEnd);
+    console.log("targetDayEnd:", targetDayEnd.getTime());
 
     const result = await Task.find(
       {
         "assignedUser._id": _id,
         startAt: {
-          $gte: targetDayStart,
-          $lt: targetDayEnd,
+          $gte: targetDayStart.getTime(),
+          $lt: targetDayEnd.getTime(),
         },
       },
       "-createdAt -updatedAt"
