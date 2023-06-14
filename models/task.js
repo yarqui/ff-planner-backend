@@ -12,14 +12,14 @@ const taskSchema = new Schema(
   {
     // timestamp
     startAt: {
-      type: Number,
-      match: TIMESTAMP_REGEX,
+      type: String,
+      // match: TIMESTAMP_REGEX,
       required: [true, "Set a start time to a task"],
     },
     // timestamp
     endAt: {
-      type: Number,
-      match: TIMESTAMP_REGEX,
+      type: String,
+      // match: TIMESTAMP_REGEX,
       required: [true, "Set an end time to a task"],
     },
     title: {
@@ -67,8 +67,8 @@ taskSchema.post("save", handleMongooseError);
 
 // Joi schema for adding a task
 const addTaskSchema = Joi.object({
-  startAt: Joi.number().required(),
-  endAt: Joi.number().required(),
+  startAt: Joi.string().required(),
+  endAt: Joi.string().required(),
   title: Joi.string().required(),
   priority: Joi.string()
     .valid(...PRIORITY_VALUES)
@@ -79,8 +79,8 @@ const addTaskSchema = Joi.object({
 }).unknown(true);
 
 const updateTaskSchema = Joi.object({
-  startAt: Joi.number(),
-  endAt: Joi.number(),
+  startAt: Joi.string(),
+  endAt: Joi.string(),
   title: Joi.string(),
   priority: Joi.string().valid(...PRIORITY_VALUES),
   category: Joi.string().valid(...CATEGORY_VALUES),
