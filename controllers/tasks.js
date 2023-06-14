@@ -58,19 +58,16 @@ const getTasks = async (req, res) => {
   }
 
   if (filterBy === "day") {
-    const targetDate = new Date(convertedDate).toLocaleString("en-US", {
-      timeZone: "Europe/Kiev",
-    });
-    console.log("targetDate:", targetDate);
+    console.log("convertedDate:", convertedDate);
 
     // const targetDayStart = new Date(targetDate);
-    const targetDayStart = new Date(targetDate);
+    const targetDayStart = new Date(convertedDate);
     targetDayStart.setUTCHours(0, 0, 0, 0);
     console.log("targetDayStart:", targetDayStart);
     console.log("targetDayStart:", targetDayStart.getTime());
 
     // const targetDayEnd = new Date(targetDate);
-    const targetDayEnd = new Date(targetDate);
+    const targetDayEnd = new Date(convertedDate);
     targetDayEnd.setUTCHours(23, 59, 59, 999);
     console.log("targetDayEnd:", targetDayEnd);
     console.log("targetDayEnd:", targetDayEnd.getTime());
