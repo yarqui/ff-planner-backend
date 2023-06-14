@@ -5,6 +5,7 @@ const getTasks = async (req, res) => {
   const { _id } = req.user;
   const { filterBy, date } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
+  console.log("convertedDate:", convertedDate);
 
   if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
@@ -42,11 +43,11 @@ const getTasks = async (req, res) => {
 
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
+    console.log("targetDayStart:", targetDayStart);
 
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
-
-    console.log("target date", targetDate);
+    console.log("targetDayEnd:", targetDayEnd);
 
     const result = await Task.find(
       {
