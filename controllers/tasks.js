@@ -4,7 +4,6 @@ const { User } = require("../models/user");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
-  console.log("_id:", _id);
   const { filterBy, date } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
 
@@ -13,14 +12,14 @@ const getTasks = async (req, res) => {
     const targetYear = new Date(convertedDate).getFullYear();
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    startOfMonth.setHoursUTC(0, 0, 0, 0);
 
     const startOfMonthKyiv = new Date(
       startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
     );
 
     const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
-    endOfMonth.setHours(23, 59, 59, 999);
+    endOfMonth.setHoursUTC(23, 59, 59, 999);
 
     const endOfMonthKyiv = new Date(
       endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
@@ -66,13 +65,13 @@ const getTasks = async (req, res) => {
 
     // const targetDayStart = new Date(targetDate);
     const targetDayStart = new Date(targetDate);
-    targetDayStart.setHours(0, 0, 0, 0);
+    targetDayStart.setHoursUTC(0, 0, 0, 0);
     console.log("targetDayStart:", targetDayStart);
     console.log("targetDayStart:", targetDayStart.getTime());
 
     // const targetDayEnd = new Date(targetDate);
     const targetDayEnd = new Date(targetDate);
-    targetDayEnd.setHours(23, 59, 59, 999);
+    targetDayEnd.setHoursUTC(23, 59, 59, 999);
     console.log("targetDayEnd:", targetDayEnd);
     console.log("targetDayEnd:", targetDayEnd.getTime());
 
