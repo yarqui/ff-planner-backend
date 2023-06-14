@@ -96,7 +96,7 @@ const deleteReview = async (req, res) => {
     throw HttpError(404);
   }
 
-  const idByOwnerReview = review.owner._id.toString();
+  const idByOwnerReview = review.ownerId.toString();
 
   if (idByOwnerReview !== currentUserId.toString()) {
     throw HttpError(401);
