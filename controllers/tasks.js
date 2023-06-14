@@ -48,7 +48,7 @@ const getTasks = async (req, res) => {
         title,
         priority,
         category,
-        assignedUserId: Array.from(usersFromTasks).find(
+        assignedUser: Array.from(usersFromTasks).find(
           ({ _id }) => _id.toString() === assignedUserId
         ),
       })
@@ -101,7 +101,7 @@ const getTasks = async (req, res) => {
         title,
         priority,
         category,
-        assignedUserId: Array.from(usersFromTasks).find(
+        assignedUser: Array.from(usersFromTasks).find(
           ({ _id }) => _id.toString() === assignedUserId
         ),
       })
