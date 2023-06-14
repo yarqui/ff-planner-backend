@@ -40,19 +40,25 @@ const getTasks = async (req, res) => {
     const targetDate = new Date(convertedDate).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
     });
+    console.log("targetDate:", targetDate);
 
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
     console.log("targetDayStart:", targetDayStart);
+    console.log("targetDayStart:", targetDayStart.getTime());
 
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
     console.log("targetDayEnd:", targetDayEnd);
+    console.log("targetDayEnd:", targetDayEnd.getTime());
 
     const result = await Task.find(
       {
         "assignedUser._id": _id,
-        startAt: { $gte: targetDayStart, $lt: targetDayEnd },
+        startAt: {
+          $gte: targetDayStart.getTime(),
+          $lt: targetDayEnd.getTime(),
+        },
       },
       "-createdAt -updatedAt"
     );
