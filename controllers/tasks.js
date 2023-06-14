@@ -176,7 +176,7 @@ const updateTaskById = async (req, res) => {
     throw HttpError(404);
   }
 
-  const receivedUserId = receivedTask.assignedUser._id.toString();
+  const receivedUserId = receivedTask.assignedUserId.toString();
 
   if (reqUserId !== receivedUserId) {
     throw HttpError(401);
