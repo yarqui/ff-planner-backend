@@ -14,27 +14,55 @@ const getTasks = async (req, res) => {
   console.log("offset:", offset);
 
   if (filterBy === "month") {
-    const targetMonth = new Date(convertedDate).getMonth();
-    const targetYear = new Date(convertedDate).getFullYear();
+    // const targetMonth = dataRef.getMonth();
+    // const targetYear = dataRef.getFullYear();
+    // console.log("targetMonth:", targetMonth);
+    // console.log("targetYear:", targetYear);
+
+    // const startOfMonth = new Date(targetYear, targetMonth, 1);
+    // startOfMonth.setUTCHours(0, 0, 0, 0);
+    // console.log("startOfMonth:", startOfMonth);
+
+    // const startOfMonthOffset = new Date(
+    //   Date.UTC(targetYear, targetMonth, 1) - offset
+    // ); // Adjust for user's local offset
+
+    // console.log("startOfMonthOffset:", startOfMonthOffset);
+
+    // const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
+    // endOfMonth.setUTCHours(23, 59, 59, 999);
+    // console.log("endOfMonth:", endOfMonth);
+
+    // const endOfMonthOffset = new Date(
+    //   Date.UTC(targetYear, targetMonth, 0) - offset
+    // ); // Adjust for user's local offset
+
+    // console.log("endOfMonthOffset:", endOfMonthOffset);
+    const targetMonth = dataRef.getMonth();
+    const targetYear = dataRef.getFullYear();
+    console.log("targetMonth:", targetMonth);
+    console.log("targetYear:", targetYear);
 
     const startOfMonth = new Date(targetYear, targetMonth, 1);
     startOfMonth.setUTCHours(0, 0, 0, 0);
+    console.log("startOfMonth:", startOfMonth);
 
-    const startOfMonthKyiv = new Date(
-      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
-    );
+    const startOfMonthOffset = new Date(startOfMonth.getTime() - offset); // Adjust for user's local offset
+
+    console.log("startOfMonthOffset:", startOfMonthOffset);
 
     const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
     endOfMonth.setUTCHours(23, 59, 59, 999);
+    console.log("endOfMonth:", endOfMonth);
 
-    const endOfMonthKyiv = new Date(
-      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
-    );
+    const endOfMonthOffset = new Date(endOfMonth.getTime() - offset); // Adjust for user's local offset
+
+    console.log("endOfMonthOffset:", endOfMonthOffset);
 
     const filteredTasks = await Task.find(
       {
         assignedUserId: _id,
-        startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
+        startAt: { $gte: startOfMonth, $lt: endOfMonthOffset },
       },
       "-createdAt -updatedAt"
     );
