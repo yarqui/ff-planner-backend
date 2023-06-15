@@ -5,7 +5,13 @@ const { User } = require("../models/user");
 const getTasks = async (req, res) => {
   const { _id } = req.user;
   const { filterBy, date } = req.query;
-  const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
+  console.log("date:", date); // date is a string ''Fri Jun 16 2023 00:00:00 GMT+0300 (за східноєвропейським літнім часом)''
+
+  const dataRef = new Date(date); // it's UTC time
+  console.log("dataRef:", dataRef);
+  const offset = dataRef.getTimezoneOffset() * 60000; // Convert minutes to milliseconds
+
+  console.log("offset:", offset);
 
   if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
@@ -58,24 +64,18 @@ const getTasks = async (req, res) => {
   }
 
   if (filterBy === "day") {
-    console.log("convertedDate:", convertedDate);
-
-    const targetDayStart = new Date(convertedDate);
+    const targetDayStart = new Date(dataRef);
     targetDayStart.setUTCHours(0, 0, 0, 0);
-    console.log("targetDayStart:", targetDayStart);
-    console.log("targetDayStart:", targetDayStart.getTime());
 
-    const targetDayEnd = new Date(convertedDate);
+    const targetDayEnd = new Date(dataRef);
     targetDayEnd.setUTCHours(23, 59, 59, 999);
-    console.log("targetDayEnd:", targetDayEnd);
-    console.log("targetDayEnd:", targetDayEnd.getTime());
 
     const filteredTasks = await Task.find(
       {
         assignedUserId: _id,
         startAt: {
-          $gte: targetDayStart.getTime(),
-          $lt: targetDayEnd.getTime(),
+          $gte: new Date(targetDayStart - offset), // Adjust for user's local offset
+          $lt: new Date(targetDayEnd - offset), // Adjust for user's local offset
         },
       },
       "-createdAt -updatedAt"
