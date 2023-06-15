@@ -14,7 +14,6 @@ const getTasks = async (req, res) => {
   console.log("offset:", offset);
 
   if (filterBy === "month") {
-    // const targetMonth = dataRef.getMonth();
     // const targetYear = dataRef.getFullYear();
     // console.log("targetMonth:", targetMonth);
     // console.log("targetYear:", targetYear);
@@ -62,7 +61,7 @@ const getTasks = async (req, res) => {
     const filteredTasks = await Task.find(
       {
         assignedUserId: _id,
-        startAt: { $gte: startOfMonth, $lt: endOfMonthOffset },
+        startAt: { $gte: startOfMonthOffset, $lt: endOfMonthOffset },
       },
       "-createdAt -updatedAt"
     );
@@ -94,16 +93,20 @@ const getTasks = async (req, res) => {
   if (filterBy === "day") {
     const targetDayStart = new Date(dataRef);
     targetDayStart.setUTCHours(0, 0, 0, 0);
+    console.log("targetDayStart:", targetDayStart);
 
     const targetDayEnd = new Date(dataRef);
     targetDayEnd.setUTCHours(23, 59, 59, 999);
+    console.log("targetDayEnd:", targetDayEnd);
+    console.log(new Date(targetDayStart - offset));
+    console.log(new Date(targetDayEnd - offset));
 
     const filteredTasks = await Task.find(
       {
         assignedUserId: _id,
         startAt: {
-          $gte: new Date(targetDayStart - offset), // Adjust for user's local offset
-          $lt: new Date(targetDayEnd - offset), // Adjust for user's local offset
+          $gte: new Date(targetDayStart.getTime() + offset), // Adjust for user's local offset
+          $lt: new Date(targetDayEnd.getTime() + offset), // Adjust for user's local offset
         },
       },
       "-createdAt -updatedAt"
