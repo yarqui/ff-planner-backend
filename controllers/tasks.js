@@ -1,73 +1,102 @@
+var moment = require("moment");
 const { ctrlWrapper, HttpError } = require("../helpers");
 const { Task } = require("../models/task");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
   const { filterBy, date } = req.query;
-  const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
-  console.log("convertedDate:", convertedDate);
-
-  if (filterBy === "month") {
-    const targetMonth = new Date(convertedDate).getMonth();
-    const targetYear = new Date(convertedDate).getFullYear();
-
-    const startOfMonth = new Date(targetYear, targetMonth, 1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const startOfMonthKyiv = new Date(
-      startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
-    );
-
-    const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
-    endOfMonth.setHours(23, 59, 59, 999);
-
-    const endOfMonthKyiv = new Date(
-      endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
-    );
-
-    const result = await Task.find(
-      {
-        "assignedUser._id": _id,
-        startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
-      },
-      "-createdAt -updatedAt"
-    );
-    res.status(200).json(result);
-    return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
-  }
 
   if (filterBy === "day") {
-    const targetDate = new Date(convertedDate).toLocaleString("en-US", {
-      timeZone: "Europe/Kiev",
-    });
-    console.log("targetDate:", targetDate);
+    const clientTimestamp = parseInt(date);
+    console.log("clientTimestamp:", clientTimestamp);
 
-    // const targetDayStart = new Date(targetDate);
-    const targetDayStart = new Date(targetDate);
-    targetDayStart.setHours(0, 0, 0, 0);
-    console.log("targetDayStart:", targetDayStart);
-    console.log("targetDayStart:", targetDayStart.getTime());
+    const clientDateTime = moment(clientTimestamp).utcOffset("+03:00");
+    console.log("clientDateTime:", clientDateTime);
 
-    // const targetDayEnd = new Date(targetDate);
-    const targetDayEnd = new Date(targetDate);
-    targetDayEnd.setHours(23, 59, 59, 999);
-    console.log("targetDayEnd:", targetDayEnd);
-    console.log("targetDayEnd:", targetDayEnd.getTime());
+    const startOfDay = moment(clientDateTime.startOf("day").toDate()).valueOf();
+    console.log("startOfDay:", startOfDay);
+
+    const endOfDay = moment(clientDateTime.endOf("day").toDate()).valueOf();
+    console.log("endOfDay:", endOfDay);
 
     const result = await Task.find(
       {
         "assignedUser._id": _id,
         startAt: {
-          $gte: targetDayStart.getTime(),
-          $lt: targetDayEnd.getTime(),
+          $gte: startOfDay,
+          $lte: endOfDay,
         },
       },
       "-createdAt -updatedAt"
     );
 
+    console.log("result:", result);
     res.status(200).json(result);
-    return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
+    return;
   }
+
+  // if (filterBy === "month") {
+  //   const targetMonth = new Date(convertedDate).getMonth();
+  //   const targetYear = new Date(convertedDate).getFullYear();
+
+  //   const startOfMonth = new Date(targetYear, targetMonth, 1);
+  //   startOfMonth.setHours(0, 0, 0, 0);
+
+  //   const startOfMonthKyiv = new Date(
+  //     startOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+  //   );
+
+  //   const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
+  //   endOfMonth.setHours(23, 59, 59, 999);
+
+  //   const endOfMonthKyiv = new Date(
+  //     endOfMonth.toLocaleString("en-US", { timeZone: "Europe/Kiev" })
+  //   );
+
+  //   const result = await Task.find(
+  //     {
+  //       "assignedUser._id": _id,
+  //       startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
+  //     },
+  //     "-createdAt -updatedAt"
+  //   );
+  //   res.status(200).json(result);
+  //   return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
+  // }
+
+  // if (filterBy === "day") {
+  //   const targetDate = new Date(convertedDate).toLocaleString("en-US", {
+  //     timeZone: "Europe/Kiev",
+  //   });
+  //   console.log("targetDate:", targetDate);
+
+  //   // const targetDayStart = new Date(targetDate);
+  //   const targetDayStart = new Date(targetDate);
+  //   targetDayStart.setHours(0, 0, 0, 0);
+  //   console.log("targetDayStart:", targetDayStart);
+  //   console.log("targetDayStart:", targetDayStart.getTime());
+
+  //   // const targetDayEnd = new Date(targetDate);
+  //   const targetDayEnd = new Date(targetDate);
+  //   targetDayEnd.setHours(23, 59, 59, 999);
+  //   console.log("targetDayEnd:", targetDayEnd);
+  //   console.log("targetDayEnd:", targetDayEnd.getTime());
+
+  //   const result = await Task.find(
+  //     {
+  //       "assignedUser._id": _id,
+  //       startAt: {
+  //         $gte: targetDayStart.getTime(),
+  //         $lt: targetDayEnd.getTime(),
+  //       },
+  //     },
+  //     "-createdAt -updatedAt"
+  //   );
+
+  //   res.status(200).json(result);
+  //   return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
+  // }
+
   throw HttpError(501, "The request is not supported");
 };
 
