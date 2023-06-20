@@ -6,3 +6,6 @@
 - `npm run dev` &mdash; start server in development mode
 - `npm run lint` &mdash; start check test with eslint
 - `npm lint:fix` &mdash; start check test with eslint automatic error fix
+
+### You can find an OpenAPI specification here:
+https://ff-planner.onrender.com/api-docs
