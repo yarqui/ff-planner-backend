@@ -49,6 +49,10 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    rest: {
+      type: String,
+      default: none,
+    },
     token: {
       type: String,
       // we don't have a token, until the user logs in
@@ -106,6 +110,7 @@ const updateUserSchema = Joi.object({
   birthday: Joi.number().allow(""),
   theme: Joi.string().valid(...THEME_VALUES),
   language: Joi.string().valid(...LANG_VALUES),
+  rest: Joi.string(),
 }).unknown(true);
 
 const userPasswordSchema = Joi.object({

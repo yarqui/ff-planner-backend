@@ -170,6 +170,7 @@ const getCurrentUser = async (req, res) => {
     birthday,
     skype,
     avatarURL,
+    rest,
   } = req.user;
   const { userId: id } = req.params;
 
@@ -188,6 +189,7 @@ const getCurrentUser = async (req, res) => {
       birthday,
       skype,
       avatarURL,
+      rest,
     },
   });
 };
@@ -205,7 +207,8 @@ const updateUserProfile = async (req, res) => {
     throw HttpError(400, "No data to update with");
   }
 
-  const { theme, name, email, phone, birthday, skype, language } = req.body;
+  const { theme, name, email, phone, birthday, skype, language, rest } =
+    req.body;
   // sanitizes email and writes it to req.body
   if (email) {
     const normalizedEmail = email.toLowerCase().trim();
@@ -214,10 +217,20 @@ const updateUserProfile = async (req, res) => {
 
   const updatedUser = await User.findByIdAndUpdate(
     _id,
-    { theme, name, email, phone, birthday, skype, language },
+    {
+      theme,
+      name,
+      email,
+      phone,
+      birthday,
+      skype,
+      language,
+      rest,
+    },
     {
       new: true,
-      select: "id theme language name email phone birthday skype avatarURL",
+      select:
+        "id theme language name email phone birthday skype avatarURL rest",
     }
   );
 
