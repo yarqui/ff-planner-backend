@@ -51,7 +51,7 @@ const userSchema = new Schema(
     },
     rest: {
       type: String,
-      default: none,
+      default: null,
     },
     token: {
       type: String,
