@@ -22,6 +22,11 @@ const taskSchema = new Schema(
       match: TIMESTAMP_REGEX,
       required: [true, "Set an end time to a task"],
     },
+    finishedAt: {
+      type: Number,
+      match: TIMESTAMP_REGEX,
+      default: null,
+    },
     title: {
       type: String,
       maxLength: 200,
@@ -70,6 +75,7 @@ const addTaskSchema = Joi.object({
 const updateTaskSchema = Joi.object({
   startAt: Joi.number(),
   endAt: Joi.number(),
+  finishedAt: Joi.number(),
   title: Joi.string(),
   priority: Joi.string().valid(...PRIORITY_VALUES),
   category: Joi.string().valid(...CATEGORY_VALUES),

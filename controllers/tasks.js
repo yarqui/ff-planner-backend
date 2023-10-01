@@ -45,15 +45,17 @@ const getTasks = async (req, res) => {
         _id,
         startAt,
         endAt,
+        createdAt,
+        finishedAt,
         title,
         priority,
         category,
-        createdAt,
       }) => ({
         _id,
         startAt,
         endAt,
         createdAt,
+        finishedAt,
         title,
         priority,
         category,
@@ -121,10 +123,17 @@ const getTasks = async (req, res) => {
   }
   throw HttpError(501, "The request is not supported");
 };
-
+// TODO: check category, if it exists, set appropriate category, in other case - null
 const addTask = async (req, res) => {
   const { _id: assignedUserId } = req.user;
-  const { startAt, endAt, title, priority, category } = req.body;
+  const {
+    startAt,
+    endAt,
+    title,
+    priority,
+    category,
+    finishedAt = null,
+  } = req.body;
 
   if (startAt > endAt) {
     throw HttpError(400, "End time should be later than start time");
@@ -133,6 +142,7 @@ const addTask = async (req, res) => {
   const result = await Task.create({
     startAt,
     endAt,
+    finishedAt,
     title,
     priority,
     category,
@@ -203,9 +213,17 @@ const updateTaskById = async (req, res) => {
     throw HttpError(400, "End time should be later than start time");
   }
 
+  let finishedAt = null;
+
+  if (category === "done") {
+    finishedAt = new Date().getTime();
+  } else {
+    finishedAt = null;
+  }
+
   const result = await Task.findOneAndUpdate(
     { _id: taskId },
-    { startAt, endAt, title, priority, category },
+    { startAt, endAt, title, priority, category, finishedAt },
     {
       new: true,
     }
