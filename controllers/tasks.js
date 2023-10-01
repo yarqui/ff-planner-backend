@@ -4,8 +4,60 @@ const { User } = require("../models/user");
 
 const getTasks = async (req, res) => {
   const { _id } = req.user;
-  const { filterBy, date } = req.query;
+  const { filterBy, date, startDate = null, endDate = null } = req.query;
   const convertedDate = +date; // a value from query string is a string, so we have to convert it to Number
+
+  if (filterBy === "range" && startDate && endDate) {
+    const targetStart = +startDate;
+
+    const targetEnd = +endDate;
+
+    const filteredTasks = await Task.find(
+      {
+        assignedUserId: _id,
+        startAt: {
+          $gte: targetStart,
+          $lte: targetEnd,
+        },
+      },
+      "-createdAt -updatedAt"
+    );
+
+    const usersFromTasks = await Promise.all(
+      Array.from(
+        new Set(filteredTasks.map(({ assignedUserId }) => assignedUserId))
+      ).map((id) => User.findById(id, "_id name avatarURL "))
+    );
+
+    const updatedTasks = filteredTasks.map(
+      ({
+        assignedUserId,
+        _id,
+        startAt,
+        endAt,
+        createdAt,
+        finishedAt,
+        title,
+        priority,
+        category,
+      }) => ({
+        _id,
+        startAt,
+        endAt,
+        createdAt,
+        finishedAt,
+        title,
+        priority,
+        category,
+        assignedUser: Array.from(usersFromTasks).find(
+          ({ _id }) => _id.toString() === assignedUserId
+        ),
+      })
+    );
+
+    res.status(200).json(updatedTasks);
+    return; // ❗ Don't remove. Without return it doesn't stop function execution
+  }
 
   if (filterBy === "month") {
     const targetMonth = new Date(convertedDate).getMonth();
@@ -73,19 +125,17 @@ const getTasks = async (req, res) => {
     const targetDate = new Date(convertedDate).toLocaleString("en-US", {
       timeZone: "Europe/Kiev",
     });
-    console.log("targetDate:", targetDate);
+    // console.log("targetDate:", targetDate);
 
-    // const targetDayStart = new Date(targetDate);
     const targetDayStart = new Date(targetDate);
     targetDayStart.setHours(0, 0, 0, 0);
-    console.log("targetDayStart:", targetDayStart);
-    console.log("targetDayStart:", targetDayStart.getTime());
+    // console.log("targetDayStart:", targetDayStart);
+    // console.log("targetDayStart:", targetDayStart.getTime());
 
-    // const targetDayEnd = new Date(targetDate);
     const targetDayEnd = new Date(targetDate);
     targetDayEnd.setHours(23, 59, 59, 999);
-    console.log("targetDayEnd:", targetDayEnd);
-    console.log("targetDayEnd:", targetDayEnd.getTime());
+    // console.log("targetDayEnd:", targetDayEnd);
+    // console.log("targetDayEnd:", targetDayEnd.getTime());
 
     const filteredTasks = await Task.find(
       {
@@ -105,10 +155,22 @@ const getTasks = async (req, res) => {
     );
 
     const updatedTasks = filteredTasks.map(
-      ({ assignedUserId, _id, startAt, endAt, title, priority, category }) => ({
+      ({
+        assignedUserId,
         _id,
         startAt,
         endAt,
+        createdAt,
+        finishedAt,
+        title,
+        priority,
+        category,
+      }) => ({
+        _id,
+        startAt,
+        endAt,
+        createdAt,
+        finishedAt,
         title,
         priority,
         category,
@@ -119,11 +181,11 @@ const getTasks = async (req, res) => {
     );
 
     res.status(200).json(updatedTasks);
-    return; // ❗ Don't remove. For some reason without return it doesn't stop function execution
+    return; // ❗ Don't remove. Without return it doesn't stop function execution
   }
   throw HttpError(501, "The request is not supported");
 };
-// TODO: check category, if it exists, set appropriate category, in other case - null
+
 const addTask = async (req, res) => {
   const { _id: assignedUserId } = req.user;
   const {
