@@ -30,7 +30,7 @@ const getTasks = async (req, res) => {
         assignedUserId: _id,
         startAt: { $gte: startOfMonthKyiv, $lt: endOfMonthKyiv },
       },
-      "-createdAt -updatedAt"
+      "-updatedAt"
     );
 
     const usersFromTasks = await Promise.all(
@@ -40,10 +40,20 @@ const getTasks = async (req, res) => {
     );
 
     const updatedTasks = filteredTasks.map(
-      ({ assignedUserId, _id, startAt, endAt, title, priority, category }) => ({
+      ({
+        assignedUserId,
         _id,
         startAt,
         endAt,
+        title,
+        priority,
+        category,
+        createdAt,
+      }) => ({
+        _id,
+        startAt,
+        endAt,
+        createdAt,
         title,
         priority,
         category,

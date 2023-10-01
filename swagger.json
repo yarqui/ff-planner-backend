@@ -864,7 +864,7 @@
               },
               "language": {
                 "type": "string",
-                "enum": ["uk", "en"]
+                "enum": ["uk", "funUk", "en"]
               }
             }
           }
@@ -896,7 +896,7 @@
           },
           "language": {
             "type": "string",
-            "enum": ["uk", "en"]
+            "enum": ["uk", "funUk", "en"]
           }
         }
       },
